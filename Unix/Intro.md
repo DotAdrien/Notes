@@ -6,25 +6,25 @@ This documents is for default command use on unix
 
 ## 🧰 Base command
 
-- Change directory
+- Change directory\
 `cd /directory/`
 
-- Show current directory
+- Show current directory\
 `pwd`
 
-- Show content of a file
+- Show content of a file\
 `cat <file>`
 
-- Show first content of a file
+- Show first content of a file\
 `head <file>`
 
-- Copie file
+- Copie file\
 `cp <source> <destination>`
 
-- Move file
+- Move file\
 `mv <source> <destination>`
 
-- Remove file
+- Remove file\
 `rm -rf <file>`
 
 ---
