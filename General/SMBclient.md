@@ -13,7 +13,7 @@ Welcome to the reference guide for SMBclient usage.
 `-L`
 
 - For connecting to a drive\
-`smbclient <ip>/<drive-name>`
+`smbclient //<ip>/<drive-name>`
 
 ---
 
