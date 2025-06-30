@@ -54,8 +54,7 @@ This documents is for default command use on unix
 `find <directory> -name "flag.txt"`
 
 > [!TIP]
-> Use *.pdf to find all pdf
-> 
+> Use *.pdf to find all pdf\
 > Use grep command to sort the result
 
 - Sort result commande  
