@@ -25,4 +25,10 @@ Welcome to the reference guide for SMBclient usage.
 - Download a file\
 `get <file>`
 
+- Upload a file\
+`put <file>`
+> [!IMPORTANT]
+> Sometime smb can be web server ( to execute shell in .aspx) 
+> `<ip>:<port>/<directory>/<file>`
+
 ---
