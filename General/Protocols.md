@@ -4,30 +4,6 @@ Welcome to the reference guide for common ports and protocols in cybersecurity.
 
 ---
 
-## 🚪 Port 22: SSH (Secure Shell)
-
-- Purpose: Securely connect to remote servers or devices.
-- Protocol: SSH (Secure Shell)
-- Usage: `ssh username@hostname`
-
----
-
-## 🌐 Port 80: HTTP (Hypertext Transfer Protocol)
-
-- Purpose: Used for unencrypted web browsing.
-- Protocol: HTTP
-- Usage: Access websites without encryption.
-
----
-
-## 🔒 Port 443: HTTPS (Hypertext Transfer Protocol Secure)
-
-- Purpose: Used for secure, encrypted web browsing.
-- Protocol: HTTPS
-- Usage: Access websites securely with encryption.
-
----
-
 ## 📁 Port 21: FTP (File Transfer Protocol)
 
 - Purpose: Used for transferring files between a client and server.
@@ -36,11 +12,27 @@ Welcome to the reference guide for common ports and protocols in cybersecurity.
 
 ---
 
+## 🚪 Port 22: SSH (Secure Shell)
+
+- Purpose: Securely connect to remote servers or devices.
+- Protocol: SSH (Secure Shell)
+- Usage: `ssh username@hostname`
+
+---
+
 ## 📧 Port 25: SMTP (Simple Mail Transfer Protocol)
 
 - Purpose: Used for sending email messages between servers.
 - Protocol: SMTP
 - Usage: Send email messages using SMTP.
+
+---
+
+## 🌐 Port 80: HTTP (Hypertext Transfer Protocol)
+
+- Purpose: Used for unencrypted web browsing.
+- Protocol: HTTP
+- Usage: Access websites without encryption.
 
 ---
 
@@ -60,4 +52,10 @@ Welcome to the reference guide for common ports and protocols in cybersecurity.
 
 ---
 
-Feel free to refer back to this guide for quick reference on common ports and protocols in cybersecurity.
+## 🔒 Port 443: HTTPS (Hypertext Transfer Protocol Secure)
+
+- Purpose: Used for secure, encrypted web browsing.
+- Protocol: HTTPS
+- Usage: Access websites securely with encryption.
+
+---
