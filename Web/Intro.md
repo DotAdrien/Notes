@@ -1,6 +1,6 @@
-# 🌐 Unix / Commands
+# 🚲 Web exploitation
 
-This documents is for default command use on unix
+This documents is for Web explotation
 
 ---
 
