@@ -1,14 +1,12 @@
 # Notes
 
 Dirbuster - dirb
-
 sql map
-
-john
-
 metasploit 
-commande toute prete
 
+---
+rajouter commande toute prete
+---
 
 hashes.com
 
