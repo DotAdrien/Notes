@@ -52,21 +52,11 @@ This documents is for default command use on unix
 
 - Find file  
 `find <directory> -name "flag.txt"`
-  <sup> You can use *.pdf to find all pdf </sup>
+
+<sup> You can use *.pdf to find all pdf </sup>
 
 - Sort result commande  
 `<command> | grep "flag.txt`
-
-- Find file
-`find <directory> -name "flag.txt"`
-
-  <sup> You can use *.pdf to find all pdf </sup>
-
-- Sort result commande
-`<command> | grep "flag.txt`
-
-- Base commande
-`ls`
 
 ---
 
