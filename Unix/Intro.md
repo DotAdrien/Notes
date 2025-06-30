@@ -7,16 +7,16 @@ This documents is for default command use on unix
 ## 🧰 Base command
 
 - Change directory  
-`cd /chemin/`
+`cd /directory/`
 
 - Show current directory  
 `pwd`
 
 - Show content of a file
-`cat <fichier>`
+`cat <file>`
 
 - Show first content of a file
-`head <fichier>`
+`head <file>`
 
 - Copie file  
 `cp <source> <destination>`
@@ -25,7 +25,7 @@ This documents is for default command use on unix
 `mv <source> <destination>`
 
 - Remove file 
-`rm -rf <fichier>`
+`rm -rf <file>`
 
 ---
 
@@ -65,7 +65,7 @@ This documents is for default command use on unix
 - Base commande
 `ls`
 
-- hidden file  
+- Hidden file  
 `-a`
 
 - Show permission  
@@ -73,9 +73,11 @@ This documents is for default command use on unix
 
 ---
 
-## 🔐 Permissions et sécurité
+## 🔐 Permission
 
-- modifie les permissions (lecture, écriture, exécution)  
-`chmod 777 fichier`
+- Change permission to 
+`chmod 777 <file>`
+  > [!NOTE]
+  > Useful information that users should know, even when skimming content.
 
 ---
