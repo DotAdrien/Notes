@@ -53,7 +53,9 @@ This documents is for default command use on unix
 - Find file  
 `find <directory> -name "flag.txt"`
 
-  <sup> You can use *.pdf to find all pdf </sup>
+> [!TIP]
+> Use *.pdf to find all pdf
+> Use grep command to sort the result
 
 - Sort result commande  
 `<command> | grep "flag.txt`
@@ -71,13 +73,14 @@ This documents is for default command use on unix
 - Show permission  
 `-l`
 
+> [!NOTE]
+> File type - [owner] rwx - [group] rwx - [user] rwx
+
 ---
 
 ## 🔐 Permission
 
 - Change permission to 
 `chmod 777 <file>`
-> [!NOTE]
-> Useful information that users should know, even when skimming content.
 
 ---
