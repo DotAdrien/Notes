@@ -27,6 +27,9 @@ This documents is for default command use on unix
 - Remove file\
 `rm -rf <file>`
 
+- Outpout command in a file\
+`<command> > <file>`
+
 ---
 
 ## 👤 User and connexion
