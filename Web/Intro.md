@@ -28,3 +28,10 @@ This documents is for default command use on unix
 `rm -rf <file>`
 
 ---
+
+## 🦊 FireFox
+
+- View all source code of page easy
+Type `view-source:` before url
+
+---
