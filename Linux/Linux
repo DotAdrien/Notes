@@ -1,1 +1,18 @@
+# 🌐  Linux / Commands
 
+This documents is for default command use on unix
+
+---
+
+## 🧰 Base command
+
+
+
+---
+
+## ⚙️ Processus et surveillance
+
+- affiche tous les processus  
+`ps aux`
+
+---
