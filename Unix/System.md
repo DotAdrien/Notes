@@ -93,9 +93,6 @@ Ce document rassemble toutes les commandes Unix essentielles pour la cybersécur
 
 ## 🔐 Permissions et sécurité
 
-- affiche les permissions et le propriétaire  
-`ls -l fichier`
-
 - modifie les permissions (lecture, écriture, exécution)  
 `chmod 777 fichier`
 
