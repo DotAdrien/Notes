@@ -1,37 +1,37 @@
-# 🌐 Unix / Commandes Système pour la Cybersécurité
+# 🌐 Unix / Commands
 
-Ce document rassemble toutes les commandes Unix essentielles pour la cybersécurité. Il inclut la gestion des fichiers, utilisateurs, processus, réseau, permissions et analyses de sécurité.
+This documents is for default command use on unix
 
 ---
 
-## 🧰 Commandes de base
+## 🧰 Base command
 
-- liste tous les fichiers, y compris cachés, en détail  
-`ls -la`
-
-- change le répertoire courant  
+- Change directory  
 `cd /chemin/`
 
-- affiche le chemin complet du répertoire actuel  
+- Show current directory  
 `pwd`
 
-- affiche le contenu d’un fichier  
+- Show content of a file
 `cat <fichier>`
 
-- copie un fichier  
+- Show first content of a file
+`head <fichier>`
+
+- Copie file  
 `cp <source> <destination>`
 
-- déplace ou renomme un fichier  
+- Move file
 `mv <source> <destination>`
 
-- supprime un dossier et son contenu (attention!)  
+- Remove file 
 `rm -rf <fichier>`
 
 ---
 
-## 👤 Gestion des utilisateurs et connexions
+## 👤 User and connexion
 
-- affiche qui est connecté et ce qu’ils font  
+- Show who is connected
 `w`
 
 - liste des utilisateurs connectés  
@@ -48,33 +48,11 @@ Ce document rassemble toutes les commandes Unix essentielles pour la cybersécur
 
 ---
 
-## ⚙️ Processus et surveillance
-
-- affiche tous les processus  
-`ps aux`
-
----
-
-## 🌐 Analyse réseau
-
-- affiche les sockets TCP/UDP écoutés avec PID et programme  
-`ss -tulnp`
-
-- affiche les ports ouverts  
-`netstat -tulnp`
-
-- liste tous les fichiers ouverts avec connexions réseau  
-`lsof -i`
-
-- affiche les processus utilisant un port spécifique  
-`lsof -i :<port>`
-
----
-
 ## 🔎 Recherche de fichiers et contenu
 
-- trouve tous les scripts shell  
-`find / -name "*.sh"`
+- Find file
+`find <directory> -name "flag.txt"`
+<!--You can use *.pdf to find all pdf -->
 
 ---
 
