@@ -1,4 +1,4 @@
-# Notes
+
 
 Dirbuster - dirb
 sql map
