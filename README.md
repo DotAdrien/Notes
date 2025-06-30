@@ -8,3 +8,6 @@ john
 
 metasploit 
 commande toute prete
+
+
+hashes.com
