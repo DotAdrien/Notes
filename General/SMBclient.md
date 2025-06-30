@@ -7,13 +7,13 @@ Welcome to the reference guide for SMBclient usage.
 ## 🍕 Command
 
 - SMB default\
-`smbclient //<ip>`
+`smbclient <ip>`
 
 - List all drive\
 `-L`
 
 - For connecting to a drive\
-`smbclient //<ip>/<drive-name>`
+`smbclient <ip>/<drive-name>`
 
 ---
 
