@@ -31,19 +31,19 @@ This documents is for default command use on unix
 
 ## 👤 User and connexion
 
-- Show who is connected
+- Show who is connected\
 `w`
 
-- liste des utilisateurs connectés  
+- liste des utilisateurs connectés\
 `users`
 
-- historique des connexions  
+- historique des connexions\
 `last`
 
-- affiche UID, GID et groupes d’un utilisateur  
+- affiche UID, GID et groupes d’un utilisateur\
 `id`
 
-- liste les groupes d’un utilisateur  
+- liste les groupes d’un utilisateur\
 `groups <utilisateur>`
 
 ---
