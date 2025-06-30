@@ -56,7 +56,7 @@ This documents is for default command use on unix
   <sup> You can use *.pdf to find all pdf </sup>
 
 - Sort result commande
-`<command> | grep "flag.txt`
+  `<command> | grep "flag.txt`
 
 ---
 
