@@ -1,6 +1,6 @@
 # 🌸 John command
 
-Welcome to the reference guide for John usage.
+Welcome to the reference guide for Nmap.
 
 ---
 
