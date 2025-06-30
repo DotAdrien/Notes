@@ -1,4 +1,4 @@
-# 🌐 John command
+# 🍔 John command
 
 Welcome to the reference guide for John usage.
 
