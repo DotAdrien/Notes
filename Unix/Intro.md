@@ -53,6 +53,7 @@ This documents is for default command use on unix
 - Find file
 `find <directory> -name "flag.txt"`
 <!--You can use *.pdf to find all pdf -->
+<small>Voici un texte en plus petit.</small>
 
 ---
 
