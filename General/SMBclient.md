@@ -6,7 +6,23 @@ Welcome to the reference guide for SMBclient usage.
 
 ## 🍕 Command
 
-- Nmap default\
-`nmap <ip>`
+- SMB default\
+`smbclient //<ip>`
+
+- List all drive\
+`-L`
+
+- For connecting to a drive\
+`smbclient //<ip>/<drive-name>`
+
+---
+
+## 🎉 When connected
+
+- List file\
+`ls`
+
+- Download a file\
+`get <file>`
 
 ---
