@@ -64,7 +64,7 @@ This documents is for default command use on unix
 
 ## 🗒️ List file
 
-- Base commande
+- Base commande\
 `ls`
 
 - Hidden file  
