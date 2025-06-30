@@ -80,7 +80,7 @@ This documents is for default command use on unix
 
 ## 🔐 Permission
 
-- Change permission to 
+- Change permission to full perm to everyone\
 `chmod 777 <file>`
 
 ---
