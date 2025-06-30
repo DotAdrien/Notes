@@ -31,12 +31,6 @@ This documents is for default command use on unix
 
 ## 👤 User and connexion
 
-- Show who is connected\
-`w`
-
-- liste des utilisateurs connectés\
-`users`
-
 - historique des connexions\
 `last`
 
@@ -45,6 +39,9 @@ This documents is for default command use on unix
 
 - liste les groupes d’un utilisateur\
 `groups <utilisateur>`
+
+- Show name of me\
+`whoami`
 
 ---
 
