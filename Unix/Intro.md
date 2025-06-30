@@ -77,7 +77,7 @@ This documents is for default command use on unix
 
 - Change permission to 
 `chmod 777 <file>`
-  > [!NOTE]
-  > Useful information that users should know, even when skimming content.
+> [!NOTE]
+> Useful information that users should know, even when skimming content.
 
 ---
