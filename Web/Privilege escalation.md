@@ -1,4 +1,4 @@
-# 🌐 Privilege escalation
+# 📚 Privilege escalation after web
 
 This documents is for Privilege escalation when been web server user
 
