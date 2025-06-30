@@ -50,6 +50,9 @@ This documents is for default command use on unix
 
 ## 🔎 Recherche de fichiers et contenu
 
+- hidden file  
+`-a`
+
 - Find file
 `find <directory> -name "flag.txt"`
 
