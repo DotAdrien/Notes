@@ -1,0 +1,23 @@
+# 🚤  Windows / Commands
+
+This documents is for Privilege explotation use on windows
+
+---
+
+## 🦑 Command for miss configuration
+
+- Show the privilege of the current user\
+`whoami /priv`
+
+> [!IMPORTANT]
+> This lead to privilege escalation\
+> `SeImpersonatePrivilege`
+
+---
+
+## 🫛 winPeas
+
+- Windows Script to detect some breatch\
+`https://github.com/peass-ng/PEASS-ng/tree/master`
+
+---
