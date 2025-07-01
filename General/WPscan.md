@@ -17,7 +17,7 @@ Welcome to the reference guide for WPscan usage.
 ## 🌵 Brute force option
 
 - Set user\
-`admin`
+`-U <user>`
 
 - Set password / list\
 `-P <directory>`
