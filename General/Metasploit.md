@@ -12,10 +12,10 @@ Welcome to the reference guide for Metasploit usage.
 - Search metasploit exploit\
 `search <name>`
 
-- Show the options need to exploit
+- Show the options need to exploit\
 `show options`
 
-- Use option
+- Use option\
 `set <option> <value>`
 
 - Run exploit\
