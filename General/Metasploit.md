@@ -35,7 +35,7 @@ Welcome to the reference guide for Metasploit usage.
 - Set local host\
 `LHOST=<ip>`
 
--Set local port\
+- Set local port\
 `LPORT=<port>`
 
 ---
