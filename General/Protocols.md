@@ -59,3 +59,10 @@ Welcome to the reference guide for common ports and protocols in cybersecurity.
 - Usage: Check [SMBclient](https://github.com/DotAdrien/Notes/blob/main/General/SMBclient.md)
 
 ---
+
+## 🔒 Port 3389 : RDP (Remote Desktop Protocol)
+
+- Purpose: For graphical interface on windows\
+- Usage: Access rdp client [xfreerdp]()
+
+---
