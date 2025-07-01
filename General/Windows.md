@@ -18,7 +18,7 @@ This documents is for windows
 - Show in what directory whe are\
 `pwd`
 
-- Execute powershell command in cmd
+- Execute powershell command in cmd\
 `powershell -c "<command>"`
 
 ---
