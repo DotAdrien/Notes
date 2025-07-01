@@ -38,4 +38,13 @@ Welcome to the reference guide for Metasploit usage.
 - Set local port\
 `LPORT=<port>`
 
+- Set the outpout name\
+`-o <name.extension>`
+
+- Set the outpout format\
+`-f <format>`
+> [!NOTE]
+> You can use format like .exe .aspx .sh .php .dll
+
+
 ---
