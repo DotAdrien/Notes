@@ -2,6 +2,13 @@
 
 This documents is for windows
 
+--
+
+## 🚁 Use Command
+
+- Download file in powershell, add second part in cmd\
+`Invoke-WebRequest -Uri '<URL>/<FILE>' -OutFile 'c:\<DIRECTORY\<FILE>'`
+
 ---
 
 ## 🌅 Command
@@ -28,7 +35,4 @@ This documents is for windows
 - Open powershell when in cmd
 `powershell`
 
-## 🚁 Use Command
-
-- Download file in powershell, add second part in cmd\
-`Invoke-WebRequest -Uri '<URL>/<FILE>' -OutFile 'c:\<DIRECTORY\<FILE>'`
+---
