@@ -6,29 +6,36 @@ Welcome to the reference guide for Metasploit usage.
 
 ## 🏝️ MSF console
 
-- SMB default\
-`smbclient <ip>`
+- Open console\
+`msfconsole`
 
-- List all drive\
-`-L`
+- Search metasploit exploit\
+`search <name>`
 
-- For connecting to a drive\
-`smbclient //<ip>/<drive-name>`
+- Show the options need to exploit
+`show options`
+
+- Use option
+`set <option> <value>`
+
+- Run exploit\
+`run`\
+`exploit`
 
 ---
 
 ## 🐠 MSF venom
 
-- List file\
-`ls`
+- Default command\
+`msfvenom`
 
-- Download a file\
-`get <file>`
+- Set a payload\
+`-p <payload-directory>`
 
-- Upload a file\
-`put <file>`
-> [!IMPORTANT]
-> Sometime smb can be web server ( to execute shell in .aspx)\
-> `<ip>:<port>/<directory>/<file>`
+- Set local host\
+`LHOST=<ip>`
+
+-Set local port\
+`LPORT=<port>`
 
 ---
