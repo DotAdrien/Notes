@@ -1,11 +1,6 @@
 
 
 sql map
-metasploit 
-
----
-rajouter commande toute prete
-
 
 ---
 
