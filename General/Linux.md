@@ -1,4 +1,4 @@
-# 🌐 Unix / Commands
+# 🌐 Linux / Commands
 
 This documents is for default command use on unix
 
