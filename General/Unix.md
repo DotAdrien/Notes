@@ -84,3 +84,10 @@ This documents is for default command use on unix
 `chmod 777 <file>`
 
 ---
+
+## 🐍 Python
+
+- Easy transfer file on local network\
+`python3 -m http.server`
+
+---
