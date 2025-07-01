@@ -1,6 +1,5 @@
 
 
-Dirbuster - dirb
 sql map
 metasploit 
 
