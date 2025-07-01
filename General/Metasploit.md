@@ -2,6 +2,10 @@
 
 Welcome to the reference guide for Metasploit usage.
 
+> [!WARNING]
+> A shell and a meterpreter are not the same things.\
+> Be sure to test both if one is not working, both listenner and reverse shell.\
+
 ---
 
 ## 🏝️ MSF console
