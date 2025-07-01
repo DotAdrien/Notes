@@ -6,7 +6,7 @@ This documents is for windows
 
 ## 🚁 Use Command
 
-- Download file in powershell, add second part in cmd\
+- Download file in powershell\
 `Invoke-WebRequest -Uri '<URL>/<FILE>' -OutFile 'c:\<DIRECTORY\<FILE>'`
 
 ---
