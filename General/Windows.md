@@ -1,23 +1,34 @@
-# 🚤  Windows / Commands
+# 🪟  Windows / Commands
 
-This documents is for Privilege explotation use on windows
-
----
-
-## 🦑 Command for miss configuration
-
-- Show the privilege of the current user\
-`whoami /priv`
-
-> [!IMPORTANT]
-> This lead to privilege escalation\
-> `SeImpersonatePrivilege`
+This documents is for windows
 
 ---
 
-## 🫛 winPeas
+## 🌅 Command
 
-- Windows Script to detect some breatch\
-`https://github.com/peass-ng/PEASS-ng/tree/master`
+- Show the current user\
+`whoami`
+
+- Show files\
+`dir`
+
+- Move to a directory\
+`dir <directory>`
+
+- Show in what directory whe are\
+`pwd`
+
+- Execute powershell command in cmd
+`powershell -c "<command>"`
 
 ---
+
+## 🎣 Powershell
+
+- Open powershell when in cmd
+`powershell`
+
+## 🚁 Use Command
+
+- Download file in powershell, add second part in cmd\
+`Invoke-WebRequest -Uri '<URL>/<FILE>' -OutFile 'c:\<DIRECTORY\<FILE>'`
