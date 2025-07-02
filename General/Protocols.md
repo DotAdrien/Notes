@@ -66,3 +66,10 @@ Welcome to the reference guide for common ports and protocols in cybersecurity.
 - Usage: Access rdp client [xfreerdp](https://github.com/DotAdrien/Notes/blob/main/General/Xfreerdp.md)
 
 ---
+
+## 🧁 Port 3389 : NTLM (New Technology LAN Manager)
+
+- Purpose: security protocols used to authenticate users' identities in AD\
+- Usage: 
+
+---
