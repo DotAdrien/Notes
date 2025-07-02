@@ -67,7 +67,7 @@ Welcome to the reference guide for common ports and protocols in cybersecurity.
 
 ---
 
-## 🧁 Port 3389 : NTLM (New Technology LAN Manager)
+## 🧁 Port XXXX : NTLM (New Technology LAN Manager)
 
 - Purpose: security protocols used to authenticate users' identities in AD\
 - Usage: 
