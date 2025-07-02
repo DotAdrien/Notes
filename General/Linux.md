@@ -32,6 +32,22 @@ This documents is for default command use on unix
 
 ---
 
+## 🗒️ List file
+
+- Base commande\
+`ls`
+
+- Hidden file  
+`-a`
+
+- Show permission  
+`-l`
+
+> [!NOTE]
+> File type - [owner] rwx - [group] rwx - [user] rwx
+
+---
+
 ## 👤 User and connexion
 
 - historique des connexions\
@@ -59,22 +75,6 @@ This documents is for default command use on unix
 
 - Sort result commande  
 `<command> | grep "flag.txt`
-
----
-
-## 🗒️ List file
-
-- Base commande\
-`ls`
-
-- Hidden file  
-`-a`
-
-- Show permission  
-`-l`
-
-> [!NOTE]
-> File type - [owner] rwx - [group] rwx - [user] rwx
 
 ---
 
