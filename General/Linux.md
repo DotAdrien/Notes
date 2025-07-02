@@ -13,22 +13,22 @@ This documents is for default command use on unix
 `pwd`
 
 - Show content of a file\
-`cat <file>`
+`cat <FILE>`
 
 - Show first content of a file\
-`head <file>`
+`head <FILE>`
 
 - Copie file\
-`cp <source> <destination>`
+`cp <SOURCE> <DESTINATION>`
 
 - Move file\
-`mv <source> <destination>`
+`mv <DESTINATION> <DESTINATION>`
 
 - Remove file\
-`rm -rf <file>`
+`rm -rf <FILE>`
 
 - Outpout command in a file\
-`<command> > <file>`
+`<COMMAND> > <FILE>`
 
 ---
 
@@ -67,21 +67,21 @@ This documents is for default command use on unix
 ## 🔎 Recherche de fichiers et contenu
 
 - Find file  
-`find <directory> -name "flag.txt"`
+`find <DIRECTORY> -name "<FILE-NAME"`
 
 > [!TIP]
 > Use *.pdf to find all pdf\
 > Use grep command to sort the result
 
 - Sort result commande  
-`<command> | grep "flag.txt`
+`<COMMAND> | grep "flag.txt`
 
 ---
 
 ## 🔐 Permission
 
 - Change permission to full perm to everyone\
-`chmod 777 <file>`
+`chmod 777 <FILE>`
 
 ---
 
