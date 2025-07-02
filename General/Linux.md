@@ -57,7 +57,7 @@ This documents is for default command use on unix
 `id`
 
 - liste les groupes d’un utilisateur\
-`groups <utilisateur>`
+`groups <USERNAME>`
 
 - Show name of me\
 `whoami`
