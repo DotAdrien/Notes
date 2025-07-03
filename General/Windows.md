@@ -9,7 +9,7 @@ This documents is for windows
 - Download file in powershell\
 `Invoke-WebRequest -Uri '<URL>/<FILE>' -OutFile 'c:\<DIRECTORY\<FILE>'`
 
-- Use to search a file
+- Use to search a file\
 `Get-ChildItem “*<FILE-NAMe>*” -Path C:\ -Recurse -ErrorAction SilentlyContinue`
 
 ---
