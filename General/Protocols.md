@@ -39,10 +39,18 @@ Welcome to the reference guide for common ports and protocols in cybersecurity.
 
 ---
 
+
 ## 📩 Port 143: IMAP (Internet Message Access Protocol)
 
 - Purpose: Manage email messages on a server.
 - Usage: Synchronize and manage email messages.
+
+---
+
+## 📩 Port 389: LDAP ( Lightweight Directory Access Protocol )
+
+- Purpose: AD protocol that communicate with domain control
+- Usage: ...
 
 ---
 
