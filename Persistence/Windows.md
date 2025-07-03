@@ -21,3 +21,12 @@ This documents is for windows
 
 - Desactivate the option in reg to use admin with rdp
 `reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /t REG_DWORD /v LocalAccountTokenFilterPolicy /d 1`
+
+---
+
+## 🦉 Evil WinRm
+
+- Connect to a windows machine
+`evil-winrm -i <IP> -u <USER> -p <PASSWORD>`
+
+---
