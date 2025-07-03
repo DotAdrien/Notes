@@ -17,3 +17,7 @@ This documents is for windows
 
 ---
 
+## 🛸 UAC
+
+- Desactivate the option in reg to use admin with rdp
+`reg add HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System /t REG_DWORD /v LocalAccountTokenFilterPolicy /d 1`
