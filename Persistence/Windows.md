@@ -12,5 +12,8 @@ This documents is for windows
 - Add B.O to get SAM content and be less supicious\
 `net localgroup "Backup Operators" <USER> /add`
 
+- Add user to allow RDP\
+`net localgroup "Remote Management Users" <USER> /add`
+
 ---
 
