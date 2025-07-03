@@ -38,7 +38,7 @@ This documents is for windows
 - Dump password hash\
 `python3 secretsdump.py -sam sam.bak -system system.bak LOCAL`\
 > [!IMPORTANT]
-> Download the python [file](https://github.com/fin3ss3g0d/secretsdump.py/blob/main/secretsdump.py).
+> Download the python [file](https://github.com/DotAdrien/Notes/blob/main/Persistence/secretsdump.py).
 
 - Crack the hash\
 `evil-winrm -i <IP> -u <USER> -H <HASH>`
