@@ -1,10 +1,10 @@
-# 🌸 DNS
+# 🥐 DNS
 
 Welcome to the reference guide for DNS enumeration.
 
 ---
 
-## 🍕 Command
+## 🚢 FFUF
 
 - SMB default\
 `smbclient <ip>`
