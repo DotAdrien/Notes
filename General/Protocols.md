@@ -68,6 +68,13 @@ Welcome to the reference guide for common ports and protocols in cybersecurity.
 
 ---
 
+## Port 2049 : NFS ( Network File System )
+
+- Purpose: For file sharing between os, server is windows, use rcp\
+- Usage: Access rdp client [xfreerdp](https://github.com/DotAdrien/Notes/blob/main/General/Xfreerdp.md)
+
+---
+
 ## 🔒 Port 3389 : RDP (Remote Desktop Protocol)
 
 - Purpose: For graphical interface on windows\
