@@ -23,7 +23,7 @@ Welcome to the reference guide for common ports and protocols in cybersecurity.
 - Purpose: Email sender protocl
 - Usage: Send email messages using SMTP.
 
-> SMTP is pair with a receveir like pop3\
+> SMTP is pair with a receveir like pop3 or imap\
 > It verifies who sending, send it, check if delivery and send back a message if not
 
 ---
