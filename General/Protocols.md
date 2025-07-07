@@ -63,7 +63,7 @@ Welcome to the reference guide for common ports and protocols in cybersecurity.
 
 ## 🦋 Port 445: SMB (Server Message Block)
 
-- Purpose: Used for secure, encrypted web browsing.
+- Purpose: Used for sharing file on the network, windows service.
 - Usage: Check [SMBclient](https://github.com/DotAdrien/Notes/blob/main/General/SMBclient.md)
 
 ---
