@@ -37,16 +37,18 @@ Welcome to the reference guide for common ports and protocols in cybersecurity.
 
 ## 📨 Port 110: POP3 (Post Office Protocol version 3)
 
-- Purpose: Retrieve email from a server.
+- Purpose: Email receiver server
 - Usage: Access email messages from a server.
+> POP3 is pair with a receveir like smtp\
 
 ---
 
 
 ## 📩 Port 143: IMAP (Internet Message Access Protocol)
 
-- Purpose: Manage email messages on a server.
+- Purpose: Email receiver server, it synchronise the current inbox
 - Usage: Synchronize and manage email messages.
+> IMAP is pair with a receveir like smtp\
 
 ---
 
