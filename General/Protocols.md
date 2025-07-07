@@ -20,8 +20,11 @@ Welcome to the reference guide for common ports and protocols in cybersecurity.
 
 ## 📧 Port 25: SMTP (Simple Mail Transfer Protocol)
 
-- Purpose: Used for sending email messages between servers.
+- Purpose: Email sender protocl
 - Usage: Send email messages using SMTP.
+
+> SMTP is pair with a receveir like pop3
+> It verifies who sending, send it, check if delivery and send back a message if not
 
 ---
 
