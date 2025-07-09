@@ -19,12 +19,14 @@ Welcome to the reference guide for Portable Executable.
 
 - File section\
 > find with Detect It Easy or any tool for PE \
-`| Section   | Purpose                                            |`\
-`|-----------|----------------------------------------------------|`\
-`| .text     | Contains executable code and entry point           |`\
-`| .data     | Contains initialized data (strings, variables, etc.)|`\
-`00000030  00 00 00 00 00 00 00 00 00 00 00 00 E8 00 00 00  ............è...`\
-`00000040  0E 1F BA 0E 00 B4 09 CD 21 B8 01 4C CD 21 54 68  ..º..´.Í!¸.LÍ!Th`
+`| Section          | Purpose                                            |`\
+`|------------------|----------------------------------------------------|`\
+`| .text            | Contains executable code and entry point           |`\
+`| .data            | Contains initialized data (strings, variables, etc)|`\
+`| .rdata or .idata | Contains imports (Windows API) and DLLs.    |`\
+`| .reloc           | Contains relocation information                    |`\
+`| .rsrc            | Contains application resources (images, etc.)      |`\
+`| .debug           | Contains debug information                         |`
 
 ---
 
