@@ -20,9 +20,9 @@ Welcome to the reference guide for Portable Executable.
 - File section\
 > find with Detect It Easy or any tool for PE \
 `| Section   | Purpose                                            |`\
-`00000000  4D 5A 90 00 03 00 00 00 04 00 00 00 FF FF 00 00  MZ..........ÿÿ..`\
-`00000010  B8 00 00 00 00 00 00 00 40 00 00 00 00 00 00 00  ¸.......@.......`\
-`00000020  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................`\
+`|-----------|----------------------------------------------------|`\
+`| .text     | Contains executable code and entry point           |`\
+`| .data     | Contains initialized data (strings, variables, etc.)|`\
 `00000030  00 00 00 00 00 00 00 00 00 00 00 00 E8 00 00 00  ............è...`\
 `00000040  0E 1F BA 0E 00 B4 09 CD 21 B8 01 4C CD 21 54 68  ..º..´.Í!¸.LÍ!Th`
 
