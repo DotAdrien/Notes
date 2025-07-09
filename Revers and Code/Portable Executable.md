@@ -17,7 +17,7 @@ Welcome to the reference guide for Portable Executable.
 `00000030  00 00 00 00 00 00 00 00 00 00 00 00 E8 00 00 00  ............è...`\
 `00000040  0E 1F BA 0E 00 B4 09 CD 21 B8 01 4C CD 21 54 68  ..º..´.Í!¸.LÍ!Th`
 
-- File section``
+- File section\
 `| Section          | Purpose                                            |`\
 `|------------------|----------------------------------------------------|`\
 `| .text            | Contains executable code and entry point           |`\
