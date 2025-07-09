@@ -23,7 +23,7 @@ Welcome to the reference guide for Portable Executable.
 `|------------------|----------------------------------------------------|`\
 `| .text            | Contains executable code and entry point           |`\
 `| .data            | Contains initialized data (strings, variables, etc)|`\
-`| .rdata or .idata | Contains imports (Windows API) and DLLs.    |`\
+`| .rdata or .idata | Contains imports (Windows API) and DLLs.           |`\
 `| .reloc           | Contains relocation information                    |`\
 `| .rsrc            | Contains application resources (images, etc.)      |`\
 `| .debug           | Contains debug information                         |`
