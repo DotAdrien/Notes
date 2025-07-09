@@ -19,7 +19,7 @@ Welcome to the reference guide for Portable Executable.
 
 - File section\
 > find with Detect It Easy or any tool for PE \
-`Offset(h) 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F`\
+`| Section   | Purpose                                            |`\
 `00000000  4D 5A 90 00 03 00 00 00 04 00 00 00 FF FF 00 00  MZ..........ÿÿ..`\
 `00000010  B8 00 00 00 00 00 00 00 40 00 00 00 00 00 00 00  ¸.......@.......`\
 `00000020  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................`\
