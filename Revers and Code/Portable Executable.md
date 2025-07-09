@@ -8,7 +8,7 @@ Welcome to the reference guide for Portable Executable.
 
 > Using hex dump
 
-- Header
+- Header\
 > start with **MZ**\
 `Offset(h) 00 01 02 03 04 05 06 07 08 09 0A 0B 0C 0D 0E 0F`\
 `00000000  4D 5A 90 00 03 00 00 00 04 00 00 00 FF FF 00 00  MZ..........ÿÿ..`\
@@ -25,7 +25,7 @@ Welcome to the reference guide for Portable Executable.
 `| .rdata or .idata | Contains imports (Windows API) and DLLs.           |`\
 `| .reloc           | Contains relocation information                    |`\
 `| .rsrc            | Contains application resources (images, etc.)      |`\
-`| .debug           | Contains debug information                         |`\
+`| .debug           | Contains debug information                         |`
 
 
 
