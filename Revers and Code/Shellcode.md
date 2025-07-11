@@ -1,12 +1,13 @@
-#  Portable Executable
+#  Shellcode
 
-Welcome to the reference guide for Portable Executable.
+Welcome to the reference guide for Shell and code.
 
 ---
 
-## Structure
+## Portable Executable
 
 > Using hex dump
+> Using PE-bear to view pe
 
 - Header\
 > start with **MZ**\
