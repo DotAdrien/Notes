@@ -6,7 +6,7 @@ Welcome to the reference guide for Shell and code.
 
 ## Portable Executable
 
-> Using hex dump
+> Using hex dump\
 > Using PE-bear to view pe
 
 - Header\
