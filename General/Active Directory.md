@@ -1,6 +1,8 @@
-# 🎡 John command
+# 🎡 Active Directory
 
-Welcome to the reference guide for John usage.
+Welcome to the reference guide for ad.
+
+systemd-resolve --interface breachad --set-dns $THMDCIP --set-domain za.tryhackme.com
 
 ---
 
