@@ -27,4 +27,7 @@ hydra -l <username> -P <password_list> <target_ip> http-post-form "<url>:<post_d
 python -c “import pty; pty.spawn(‘/bin/bash’)”
 
 
+enum4linux
+
+
 https://www.alexandroslekkas.com/
