@@ -30,6 +30,3 @@ python -c “import pty; pty.spawn(‘/bin/bash’)”
 enum4linux
 
 https://github.com/ropnop/kerbrute/releases
-
-
-https://www.alexandroslekkas.com/
