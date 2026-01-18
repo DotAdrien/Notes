@@ -1,0 +1,3 @@
+Psexec
+Ports: 445/TCP (SMB)
+Required Group Memberships: Administrators
