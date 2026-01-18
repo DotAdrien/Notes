@@ -1,0 +1,12 @@
+Psexec
+Ports: 445/TCP (SMB)
+Required Group Memberships: Administrators
+
+Remote Process Creation Using WMI
+Ports:
+135/TCP, 49152-65535/TCP (DCERPC)
+5985/TCP (WinRM HTTP) or 5986/TCP (WinRM HTTPS)
+Required Group Memberships: Administrators
+
+
+methods and tools to extract credentials from a host. Mimikatz
