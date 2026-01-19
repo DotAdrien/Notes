@@ -144,6 +144,151 @@ DefaultAccount:503:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c0
 
 
 
+Local Security Authority Subsystem Service (LSASS).
+What is the LSASS?
+
+Local Security Authority Server Service (LSASS) is a Windows process that handles the operating system security policy and enforces it on a system. It verifies logged in accounts and ensures passwords, hashes, and Kerberos tickets. Windows system stores credentials in the LSASS process to enable users to access network resources, such as file shares, SharePoint sites, and other network services, without entering credentials every time a user connects.
+
+Thus, the LSASS process is a juicy target for red teamers because it stores sensitive information about user accounts. The LSASS is commonly abused to dump credentials to either escalate privileges, steal data, or move laterally. Luckily for us, if we have administrator privileges, we can dump the process memory of LSASS. Windows system allows us to create a dump file, a snapshot of a given process. This could be done either with the Desktop access (GUI) or the command prompt. This attack is defined in the MITRE ATT&CK framework as "OS Credential Dumping: LSASS Memory (T1003)".
+
+To dump any running Windows process using the GUI, open the Task Manager, and from the Details tab, find the required process, right-click on it, and select "Create dump file".
+
+
+Sysinternals Suite
+
+An alternative way to dump a process if a GUI is not available to us is by using ProcDump. ProcDump is a Sysinternals process dump utility that runs from the command prompt. The SysInternals Suite is already installed in the provided machine at the following path: c:\Tools\SysinternalsSuite 
+
+We can specify a running process, which in our case is lsass.exe, to be dumped as follows,
+
+
+Dumping the LSASS Process using procdump.exe 
+c:\>c:\Tools\SysinternalsSuite\procdump.exe -accepteula -ma lsass.exe c:\Tools\Mimikatz\lsass_dump
+
+ProcDump v10.0 - Sysinternals process dump utility
+Copyright (C) 2009-2020 Mark Russinovich and Andrew Richards
+Sysinternals - www.sysinternals.com
+
+[09:09:33] Dump 1 initiated: c:\Tools\Mimikatz\lsass_dump-1.dmp
+[09:09:33] Dump 1 writing: Estimated dump file size is 162 MB.
+[09:09:34] Dump 1 complete: 163 MB written in 0.4 seconds
+[09:09:34] Dump count reached.
+Note that the dump process is writing to disk. Dumping the LSASS process is a known technique used by adversaries. Thus, AV products may flag it as malicious. In the real world, you may be more creative and write code to encrypt or implement a method to bypass AV products.
+
+Protected LSASS
+
+In 2012, Microsoft implemented an LSA protection, to keep LSASS from being accessed to extract credentials from memory. This task will show how to disable the LSA protection and dump credentials from memory using Mimikatz. To enable LSASS protection, we can modify the registry RunAsPPL DWORD value in HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Lsa to 1.
+
+The steps are similar to the previous section, which runs the Mimikatz execution file with admin privileges and enables the debug mode. If the LSA protection is enabled, we will get an error executing the "sekurlsa::logonpasswords" command.
+
+
+Failing to Dump Stored Password Due to the LSA Protection
+mimikatz # sekurlsa::logonpasswords
+ERROR kuhl_m_sekurlsa_acquireLSA ; Handle on memory (0x00000005)
+The command returns a 0x00000005 error code message (Access Denied). Lucky for us, Mimikatz provides a mimidrv.sys driver that works on kernel level to disable the LSA protection. We can import it to Mimikatz by executing "!+" as follows,
+
+Loading the mimidrv Driver into Memory
+mimikatz # !+
+[*] 'mimidrv' service not present
+[+] 'mimidrv' service successfully registered
+[+] 'mimidrv' service ACL to everyone
+[+] 'mimidrv' service started
+Note: If this fails with an isFileExist error, exit mimikatz, navigate to C:\Tools\Mimikatz\ and run the command again.
+
+Once the driver is loaded, we can disable the LSA protection by executing the following Mimikatz command:
+
+Removing the LSA Protection
+mimikatz # !processprotect /process:lsass.exe /remove
+Process : lsass.exe
+PID 528 -> 00/00 [0-0-0]
+
+
+What is Credentials Manager?
+
+Credential Manager is a Windows feature that stores logon-sensitive information for websites, applications, and networks. It contains login credentials such as usernames, passwords, and internet addresses. There are four credential categories:
+
+Web credentials contain authentication details stored in Internet browsers or other applications.
+Windows credentials contain Windows authentication details, such as NTLM or Kerberos.
+Generic credentials contain basic authentication details, such as clear-text usernames and passwords.
+Certificate-based credentials: These are authentication details based on certificates.
+
+We will be using the Microsoft Credentials Manager vaultcmd utility. Let's start to enumerate if there are any stored credentials. First, we list the current windows vaults available in the Windows target. 
+
+Listing the Available Credentials from the Credentials Manager
+C:\Users\Administrator>vaultcmd /list
+
+By default, Windows has two vaults, one for Web and the other one for Windows machine credentials. The above output confirms that we have the two default vaults.
+
+Let's check if there are any stored credentials in the Web Credentials vault by running the vaultcmd command with /listproperties.
+
+Checking if there Are any Stored Credentials in the "Web Credentials."
+C:\Users\Administrator>VaultCmd /listproperties:"Web Credentials"
+
+The output shows that we have one stored credential in the specified vault. Now let's try to list more information about the stored credential as follows,
+
+Listing Credentials Details for "Web Credentials"
+C:\Users\Administrator>VaultCmd /listcreds:"Web Credentials"
+
+
+Credential Dumping
+
+The VaultCmd is not able to show the password, but we can rely on other PowerShell Scripts such as Get-WebCredentials.ps1, which is already included in the attached VM.
+
+Ensure to execute PowerShell with bypass policy to import it as a module as follows,
+
+Getting Clean-text Password from Web Credentials
+C:\Users\Administrator>powershell -ex bypass
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+PS C:\Users\Administrator> Import-Module C:\Tools\Get-WebCredentials.ps1
+PS C:\Users\Administrator> Get-WebCredentials
+
+
+NTDS Domain Controller
+
+New Technologies Directory Services (NTDS) is a database containing all Active Directory data, including objects, attributes, credentials, etc. The NTDS.DTS data consists of three tables as follows:
+
+Schema table: it contains types of objects and their relationships.
+Link table: it contains the object's attributes and their values.
+Data type: It contains users and groups.
+NTDS is located in C:\Windows\NTDS by default, and it is encrypted to prevent data extraction from a target machine. Accessing the NTDS.dit file from the machine running is disallowed since the file is used by Active Directory and is locked. However, there are various ways to gain access to it. This task will discuss how to get a copy of the NTDS file using the ntdsutil and Diskshadow tool and finally how to dump the file's content. It is important to note that decrypting the NTDS file requires a system Boot Key to attempt to decrypt LSA Isolated credentials, which is stored in the SECURITY file system. Therefore, we must also dump the security file containing all required files to decrypt. 
+
+
+Ntdsutil
+
+Ntdsutil is a Windows utility to used manage and maintain Active Directory configurations. It can be used in various scenarios such as 
+
+Restore deleted objects in Active Directory.
+Perform maintenance for the AD database.
+Active Directory snapshot management.
+Set Directory Services Restore Mode (DSRM) administrator passwords.
+For more information about Ntdsutil, you may visit the Microsoft documentation page.
+
+
+Local Dumping (No Credentials)
+
+This is usually done if you have no credentials available but have administrator access to the domain controller. Therefore, we will be relying on Windows utilities to dump the NTDS file and crack them offline. As a requirement, first, we assume we have administrator access to a domain controller. 
+
+To successfully dump the content of the NTDS file we need the following files:
+
+C:\Windows\NTDS\ntds.dit
+C:\Windows\System32\config\SYSTEM
+C:\Windows\System32\config\SECURITY
+The following is a one-liner PowerShell command to dump the NTDS file using the Ntdsutil tool in the C:\temp directory.
+
+Dumping the content of the NTDS file from the Victim Machine
+powershell "ntdsutil.exe 'ac i ntds' 'ifm' 'create full c:\temp' q q"
+Now, if we check the c:\temp directory, we see two folders: Active Directory and registry, which contain the three files we need. Transfer them to the AttackBox and run the secretsdump.py script to extract the hashes from the dumped memory file.
+
+
+Extract hashes from NTDS Locally
+user@machine$ python3.9 /opt/impacket/examples/secretsdump.py -security path/to/SECURITY -system path/to/SYSTEM -ntds path/to/ntds.dit local
+
+
+
+
+
+
 
 
 
