@@ -1,1 +1,122 @@
+Time-Based One-Time Passwords (TOTP)
+
+These are temporary passwords that change every 30 seconds or so. Apps like Google Authenticator, Microsoft Authenticator, and Authy use them, making them tough for hackers to intercept or reuse.
+
+Push Notifications
+
+Applications like Duo or Google Prompt send a login request straight to your phone. You can approve or deny access directly from your device, adding a layer of security that verifies possession of the device registered with the account.
+
+An attack involving push notifications, the MFA fatigue attack, enabled an attacker to compromise the corporate account of an Uber employee. The details of this attack are out of scope for this room, but to learn more about what happened, you may visit Uber's official security newsroom, which can be found here.
+
+SMS
+
+Most of the applications currently use this method. The system sends a text message with a one-time code to the user’s registered phone number. The user must enter this code to proceed with the login. While convenient, SMS-based authentication is less secure due to vulnerabilities associated with intercepting text messages.
+
+Hardware Tokens
+
+Devices like YubiKeys generate a one-time passcode or use NFC for authentication. They’re great because they don’t need a network or battery, so they work even offline.
+
+
+Location-Based
+
+If a user logs in from their usual location, like their office, they might only need to provide their regular login credentials. But if they're logging in from a new or unfamiliar location, the system could ask for an additional OTP or even biometric verification.
+
+Time-Based
+
+During regular working hours, users might get in with just their regular login credentials. However, if someone tries to access the system after working hours, they might be prompted for an extra layer of security, like an OTP or a security token.
+
+Behavioral Analysis
+
+Suppose a user's behavior suddenly changes, like they began accessing data they don't usually view or access at odd hours. In that case, the system can ask for additional authentication to confirm it’s really them.
+
+Device-Specific
+
+In some cases, companies don’t allow employees to use their own devices to access corporate resources. In these situations, the system might block the user after the initial login step if they’re on an unapproved device.
+
+
+Weak OTP Generation Algorithms
+The security of a One-Time Password (OTP) is only as strong as the algorithm used to create it. If the algorithm is weak or too predictable, it can make the attacker's job easier trying to guess the OTP. If an algorithm doesn't use truly random seeds, the OTPs generated might follow a pattern, making them more susceptible to prediction.
+
+Application Leaking the 2FA Token
+If an application handles data poorly or has vulnerabilities like insecure API endpoints, it might accidentally leak the 2FA token in the application's HTTP response.
+
+Due to insecure coding, some applications might also leak the 2FA token in the response. A common scenario is when a user, after login, arrives on the 2FA page, the application will trigger an XHR request to an endpoint that issues the OTP. Sometimes, this XHR request returns the OTP back to the user inside the HTTP response.
+
+Brute Forcing the OTP
+Even though OTPs are designed for one-time use, they aren't immune to brute-force attacks. If an attacker can make unlimited guesses, they might eventually get the correct OTP, especially if the OTP isn't well protected by additional security measures. It's like trying to crack a safe by turning the dial repeatedly until it clicks open, given enough time and no restrictions, it might just work.
+
+Lack of Rate Limiting
+
+Without proper rate limiting, an application is open to attackers to keep trying different OTPs without difficulty. If an attacker can submit multiple guesses in a short amount of time, it increases the likelihood that the attacker will be able to get the correct OTP.
+
+For example, in this HackerOne report, the tester was able to report a valid bug since the application doesn't employ rate limiting in the checking of the 2FA code.
+
+
+
+OTP Leakage
+The OTP leakage in the XHR (XMLHttpRequest) response typically happens due to poor implementation of the 2FA (Two-Factor Authentication) mechanism or insecure coding. Some common reasons why this happens are because of:
+
+Server-Side Validation and Return of Sensitive Data
+
+In some poorly designed applications, the server validates the OTP, and rather than just confirming success or failure, it returns the OTP itself in the response. This is often done unintentionally, as part of debugging, logging, or poor response handling practices.
+
+Lack of Proper Security Practices
+
+Developers might overlook the security implications of exposing sensitive information like OTP in the API responses. This often happens when developers are focused on making the application functional without considering how attackers could exploit these responses.
+
+Not all developers are fully aware of secure coding practices. They might implement features like 2FA without fully understanding the potential risks of exposing sensitive information in the XHR response.
+
+Debugging Information Left in Production
+
+During the development or testing phase, developers might include detailed debugging information in responses to help diagnose issues. If these debug responses are not removed before deploying to production, sensitive information like OTPs could be exposed.
+
+Exploitation
+Go to http://mfa.thm/labs/first.
+
+
+
+Log in to the application using the credentials below.
+
+Username	Password
+thm@mail.thm	test123
+Note: Open the browser’s Developer Tools (usually by pressing F12) and navigate to the "Network" tab first before clicking the Login button. This tab allows you to see all network requests made by the application, including XHR requests.
+
+
+
+Once you're on the MFA page, you will see an XHR request triggered by the application that is sent to the /token endpoint.
+
+
+
+As you can see in the XHR request submitted to the /token endpoint above, the application returns a response with a size of 16 bytes. Click this request and navigate to the Response tab, as shown below.
+
+
+
+Copy the value of the token parameter and paste it into the OTP form, then click Verify Account.
+
+
+
+
+
+To remediate this, applications should not return the generated 2FA or OTP in the response. Instead of returning the OTP, it is recommended to return a generic message like "success".
+
+
+
+Logic Flaw or Insecure Coding?
+In some applications, flawed logic or insecure coding practices can lead to a situation where critical parts of the application (i.e., the dashboard) can be accessed without fully completing the authentication process. Specifically, an attacker might be able to bypass the 2FA mechanism entirely and gain access to the dashboard or other sensitive areas without entering the OTP (One-Time Password). This is often due to improper session management, poor access control checks, or incorrectly implemented logic that fails to enforce the 2FA requirement.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
