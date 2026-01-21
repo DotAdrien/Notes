@@ -1,1 +1,66 @@
 
+The current state of the ExecutionPolicy configuration can be seen using “Get-ExecutionPolicy -list”
+
+
+
+Execution policies can have seven different values;
+
+
+
+AllSigned: Scripts can run but require all scripts to be signed by a trusted publisher.
+Bypass: All scripts can run, and no warnings or prompts will be displayed.
+Default: This refers to “restricted” for Windows clients and “RemoteSigned” for Windows servers.
+RemoteSigned: Scripts can run, and this does not require local scripts to be digitally signed.
+Restricted: The default configuration for Windows clients. Allows individual commands to run, does not allow scripts.
+Undefined: This shows that no specific execution policy was set. This means default execution policies will be enforced.
+Unrestricted: Most scripts will run.
+
+
+While several PowerShell scripts are readily available for reconnaissance, these may be flagged by the antivirus installed on the target system.
+
+
+
+Finding Missing Patches
+
+
+
+The patch level of the target system will have an impact on the steps following the initial compromise. Having an idea about the potentially missing patches could help the red teamer identify a possible privilege escalation path or even provide further information about the target system.
+
+
+
+The “Get-Hotfix” command can be used to enumerate already installed patches.
+
+
+
+
+
+
+
+
+To make things easier, we could output the result of the Get-Hotfix command in a list format and grep it further using the “findstr” command. The example below shows how the installation date of patches could be listed to have a better idea about update cycles on the target.
+
+
+
+
+
+
+
+
+
+By default, the “Get-HotFix” command will show the output in a table format. This table can be useful to list only data provided in a column without the need to use “findstr” using “Format-Table” followed by the name of the column we are interested in. The example below shows the output listing only HotFixIDs.
+
+
+
+
+
+The first part of the command, delimited by the "|" character, sets the range for the last octet. The second part generates and prints the IP address to be used and pipes it to the command line. Finally, the last part greps lines that include the “TTL” string.
+
+
+
+A similar command can be built using the existing socket and TCP client functions. In the example below, we scan the first 1024 TCP ports of the target. Note that the “2>$null” sends any error to null, providing us with a cleaner output.
+
+
+
+
+
+
