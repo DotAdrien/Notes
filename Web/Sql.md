@@ -71,4 +71,13 @@ HTTP Header Injection
 HTTP headers can carry user input, which might be used in SQL queries on the server side. user-agent injectionIf these inputs are not sanitised, it can lead to SQL injection. The technique involves manipulating HTTP headers (like User-Agent, Referer, or X-Forwarded-For) to inject SQL commands. The server might log these headers or use them in SQL queries. For example, a malicious User-Agent header would look like User-Agent: ' OR 1=1; --. If the server includes the User-Agent header in an SQL query without sanitising it, it can result in SQL injection.
 
 
+Pentesters
+
+Exploiting Database-Specific Features: Different database management systems (DBMS) have unique features and syntax. A pentester should understand the specifics of the target DBMS (e.g., MySQL, PostgreSQL, Oracle, MSSQL) to exploit these features effectively. For instance, MSSQL supports the xp_cmdshell command, which can be used to execute system commands.
+Leveraging Error Messages: Exploit verbose error messages to gain insights into the database schema and structure. Error-based SQL injection involves provoking the application to generate error messages that reveal useful information. For example, using 1' AND 1=CONVERT(int, (SELECT @@version)) -- can generate errors that leak version information.
+Bypassing WAF and Filters: Test various obfuscation techniques to bypass Web Application Firewalls (WAF) and input filters. This includes using mixed case (SeLeCt), concatenation (CONCAT(CHAR(83), CHAR(69), CHAR(76), CHAR(69), CHAR(67), CHAR(84))), and alternate encodings (hex, URL encoding). Additionally, using inline comments (/**/) and different character encodings (e.g., %09, %0A) can help bypass simple filters.
+Database Fingerprinting: Determine the type and version of the database to tailor the attack. This can be done by sending specific queries that yield different results depending on the DBMS. For instance, SELECT version() works on PostgreSQL, while SELECT @@version works on MySQL and MSSQL.
+Pivoting with SQL Injection: Use SQL injection to pivot and exploit other parts of the network. Once a database server is compromised, it can be used to gain access to other internal systems. This might involve extracting credentials or exploiting trust relationships between systems.
+
+
 
