@@ -1,0 +1,12 @@
+Common Use Cases in Web Applications
+XML is widely used in web applications for data exchange, storage, and configuration. It's often used for web services and APIs, such as SOAP and REST, to exchange data between systems. XML is also used for configuration files, such as web server configurations or application settings.
+
+What is XSLT?
+XSLT (Extensible Stylesheet Language Transformations) is a language used to transform and format XML documents. While XSLT is primarily used for data transformation and formatting, it is also significantly relevant to XXE (XML External Entities) attacks.
+
+XSLT can be used to facilitate XXE attacks in several ways:
+
+Data Extraction: XSLT can be used to extract sensitive data from an XML document, which can then be used in an XXE attack. For example, an XSLT stylesheet can extract user credentials or other sensitive information from an XML file.
+Entity Expansion: XSLT can expand entities defined in an XML document, including external entities. This can allow an attacker to inject malicious entities, leading to an XXE vulnerability.
+Data Manipulation: XSLT can manipulate data in an XML document, potentially allowing an attacker to inject malicious data or modify existing data to exploit an XXE vulnerability.
+Blind XXE: XSLT can be used to perform blind XXE attacks, in which an attacker injects malicious entities without seeing the server's response.
