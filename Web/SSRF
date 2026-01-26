@@ -1,1 +1,36 @@
 
+Scenario - I: SSRF Against a Local Server
+
+In this attack, the attacker makes an unauthorised request to the server hosting the web application. The attacker typically supplies a loopback IP address or localhost to receive the response. The vulnerability arises due to how the application handles input from the query parameter or API calls. 
+
+For example, in the HRMS application, there's a feature that loads additional pages based on a URL parameter. For example, navigating to http://hrms.thm?url=localhost/copyright would load the copyright page of the application. This feature is intended for internal use and is designed to request and display pages from the local server (hence using localhost in the query).
+
+However, due to insufficient validation of the input URL, an attacker can manipulate this functionality for SSRF attacks. By changing the URL parameter to point to other pages/services, the attacker can force the HRMS server to make requests to other pages. For instance, if the attacker uses a URL like http://hrms.thm/?url=localhost/config, and config is a valid page, the HRMS server will attempt to fetch content from this page and display the result. 
+
+The main idea is to forge a legitimate request and make the server perform an unintended action.
+
+
+Scenario - II: Accessing an Internal Server
+
+In complex web applications, it is common for front-end web applications to interact with back-end internal servers. These servers are generally hosted on non-routable IP addresses, so an internet user cannot access them. In this scenario, an attacker exploits a vulnerable web application's input validation to trick the server into requesting internal resources on the same network. They could provide a malicious URL as input, making the server interact with the internal server on their behalf.
+
+For instance, if an internal server provides database management or administrative controls, the attacker could craft a URL that initiates an unintended action on these internal systems when processed by the vulnerable web application. Technically, this is achieved through manipulated input, such as special IP addresses (like 192.168.x.x or 10.x.x.x for IPv4) or domain names (e.g., internal-database.hrms.thm). When not properly sanitised, these inputs can be used in functions like HTTP requests or file inclusions within the web application. The server, interpreting these requests as legitimate, then inadvertently performs actions or retrieves data from other internal services.
+
+Moreover, since these internal servers may lack the same level of security monitoring as external-facing servers, such exploitation can often go unnoticed. The attacker might also use this method to perform reconnaissance within the internal network, identifying other vulnerable systems or services to target.
+
+
+Blind SSRF With Out-Of-Band 
+
+Out-of-band SSRF is a technique where the attacker leverages a separate, out-of-band communication channel instead of directly receiving responses from the target server to receive information or control the exploited server. This approach is practical when the server's responses are not directly accessible to the attacker.
+
+For instance, the attacker might manipulate the vulnerable server to make a DNS request to a domain he owns or to initiate a connection to an external server with specific data. This external interaction provides the attacker with evidence that the SSRF vulnerability exists and potentially allows him to gather additional information, such as internal IP addresses or the internal network's structure.
+
+
+Crashing the Server
+
+In this SSRF demonstration, we will illustrate how an attacker can exploit a web application to cause a denial of service on the server. In our scenario, the vulnerability is exploited by supplying a malicious URL that points to a resource which, when accessed by the server, leads to excessive resource consumption or triggers a crash.
+
+For example, the attacker might input a URL pointing to a large file on a slow server or a service that responds with an overwhelming amount of data. When the vulnerable application naively accesses this URL, it engages in an action that exhausts its own system resources, leading to a slowdown or complete crash.
+
+
+
