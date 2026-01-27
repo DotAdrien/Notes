@@ -1,0 +1,154 @@
+Introduction to CL.TE request smuggling
+CL.TE stands for Content-Length/Transfer-Encoding. The name CL.TE comes from the two headers involved: Content-Length and Transfer-Encoding. In CL.TE technique, the attacker exploits discrepancies between how different servers (typically a front-end and a back-end server) prioritize these headers. For example:
+
+The proxy uses the Content-Length header to determine the end of a request.
+The back-end server uses the Transfer-Encoding header.
+
+Because of this discrepancy, it's possible to craft ambiguous requests that are interpreted differently by each server. For example, Imagine sending a request with both Content-Length and Transfer-Encoding headers. The front-end server might use the Content-Length header and think the request ends at a certain point due to the provided number of bytes. In contrast, the back-end server, relying on the Transfer-Encoding header, might interpret the request differently, leading to unexpected behaviour.
+
+Exploiting CL.TE for Request Smuggling
+To exploit the CL.TE technique, an attacker crafts a request that includes both headers, ensuring that the front-end and back-end servers interpret the request boundaries differently. For example, an attacker sends a request like:
+
+Sample Request
+POST /search HTTP/1.1
+Host: example.com
+Content-Length: 130
+Transfer-Encoding: chunked
+
+0
+
+POST /update HTTP/1.1
+Host: example.com
+Content-Length: 13
+Content-Type: application/x-www-form-urlencoded
+
+isadmin=true
+Here, the front-end server sees the Content-Length of 130 bytes and believes the request ends after  isadmin=true. However, the back-end server sees the Transfer-Encoding: chunked and interprets the 0 as the end of a chunk, making the second request the start of a new chunk. This can lead to the back-end server treating the POST /update HTTP/1.1 as a separate, new request, potentially giving the attacker unauthorized access.
+
+
+Introduction to TE.CL Technique
+TE.CL stands for Transfer-Encoding/Content-Length. This technique is the opposite of the CL.TE method. In the TE.CL approach, the discrepancy in header interpretation is flipped because the front-end server uses the Transfer-Encoding header to determine the end of a request, and the back-end server uses the Content-Length header.
+
+The TE.CL technique arises when the proxy prioritizes the Transfer-Encoding header while the back-end server prioritizes the Content-Length header.
+
+Example: If an attacker sends a request with both headers, the front-end server or proxy might interpret the request based on the Transfer-Encoding header, while the back-end server might rely on the Content-Length header. This difference in interpretation might interpret the request differently, leading to unexpected behaviour.
+
+Exploiting TE.CL for Request Smuggling
+To exploit the TE.CL technique, an attacker crafts a specially designed request that includes both the Transfer-Encoding and Content-Length headers, aiming to create ambiguity in how the front-end and back-end servers interpret the request.
+
+For example, an attacker sends a request like:
+
+Sample Request
+POST / HTTP/1.1
+Host: example.com
+Content-Length: 4
+Transfer-Encoding: chunked
+
+78
+POST /update HTTP/1.1
+Host: example.com
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 15
+
+isadmin=true
+0
+In the above payload, the front-end server sees the Transfer-Encoding: chunked header and processes the request as chunked. The 78 (hexadecimal for 120) indicates that the next 120 bytes are part of the current request's body. The front-end server considers everything up to the 0 (indicating the end of the chunked message) as part of the body of the first request.
+
+The back-end server, however, uses the Content-Length header, which is set to 4. It processes only the first 4 bytes of the request, not including the entire smuggled request POST /update. The remaining part of the request, starting from POST /update, is then interpreted by the back-end server as a separate, new request.
+
+The smuggled request is processed by the back-end server as if it were a legitimate, separate request. This request includes the isadmin=true parameter, which could potentially elevate the attacker's privileges or alter data on the server, depending on the application's functionality.
+
+Introduction to TE.TE Technique
+Transfer Encoding Obfuscation, also known as TE.TE stands for Transfer-Encoding/Transfer-Encoding. Unlike the CL.TE or TE.CL methods, the TE.TE technique arises when both the front-end and the back-end servers use the Transfer-Encoding header. In TE.TE technique, the attacker takes advantage of the servers' inconsistent handling of  Transfer-Encoding present in the HTTP headers.
+
+The TE.TE vulnerability doesn't always require multiple Transfer-Encoding headers. Instead, it often involves a single, malformed Transfer-Encoding header that is interpreted differently by the front-end and back-end servers. In some cases, the front-end server might ignore or strip out the malformed part of the header and process the request normally, while the back-end server might interpret the request differently due to the malformed header, leading to request smuggling.
+
+
+
+Example: An attacker manipulates the Transfer-Encoding header by including "chunked" in malformed variations. This is done to exploit how front-end and back-end servers prioritize the Transfer-Encoding (TE) header over Content-Length (CL). By crafting malformed Transfer-Encoding headers, the attacker aims to make one server ignore the TE header and use CL instead, leading to a discrepancy in how the request boundaries are interpreted between the front-end and back-end servers. This manipulation can result in either a CL.TE or TE.CL situation, depending on which server falls back to using the Content-Length.
+
+Exploiting TE.TE for Request Smuggling
+To exploit the TE.TE technique, an attacker may craft a request that includes Transfer-Encoding headers that use different encodings. For example, an attacker sends a request like:
+
+Sample Request
+POST / HTTP/1.1
+Host: example.com
+Content-length: 4
+Transfer-Encoding: chunked
+Transfer-Encoding: chunked1
+
+4e
+POST /update HTTP/1.1
+Host: example.com
+Content-length: 15
+
+isadmin=true
+0
+In the above payload, the front-end server encounters two Transfer-Encoding headers. The first one is a standard chunked encoding, but the second one, chunked1, is non-standard. Depending on its configuration, the front-end server might process the request based on the first Transfer-Encoding: chunked header and ignore the malformed chunked1, interpreting the entire request up to the 0 as a single chunked message.
+
+The back-end server, however, might handle the malformed Transfer-Encoding: chunked1 differently. It could either reject the malformed part and process the request similarly to the front-end server or interpret the request differently due to the presence of the non-standard header. If it processes only the first 4 bytes as indicated by the Content-length: 4, the remaining part of the request starting from POST /update is then treated as a separate, new request.
+
+The smuggled request with the isadmin=true parameter is processed by the back-end server as if it were a legitimate, separate request. This could lead to unauthorized actions or data modifications, depending on the server's functionality and the nature of the /update endpoint.
+
+Assessing the Application
+The web application for this room uses the link http://httprequestsmuggling.thm. It features a Home, Login, and Contact form that enables users to access and send feedback to the developer. For demonstration, the submitted queries are saved to the /submissions directory. Below is the screenshot of the application: 
+
+Homepage of he vulnerable application
+
+
+Exploiting the Application
+Using Burp Suite Proxy, intercept a request sent to the website's index. This request will become the baseline we will use to exploit the vulnerable application.
+
+Baseline request to be used for smuggling
+
+Send the request to Intruder and copy-paste the below payload to the Payload positions box.
+
+Payload
+POST / HTTP/1.1
+Host: httprequestsmuggling.thm
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 160
+Transfer-Encoding: chunked
+
+0
+
+POST /contact.php HTTP/1.1
+Host: httprequestsmuggling.thm
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 500
+
+username=test&query=§
+Breakdown of the payload
+In CL.TE vulnerability, since the proxy or the front-end prioritises the Content-Length header, 160 bytes of the body is assumed to be the body of the first POST. The front-end thinks this is a single request and forwards it into the pipeline, where the back-end server now prioritises Transfer-Encoding, ending the first POST request at the first 0 size chunk and assuming the second POST is a different request.
+
+Payload positions box with the payload
+
+Payload positions box with the payload
+
+Go to the Payloads tab and set the Payload type to Null payloads. Subsequently, on the Payload settings, input 10000 to generate 10000 null payloads.
+
+Null payloads settings
+
+Go to the Resource pool tab and create a new resource pool. You may follow the screenshot below for the settings.
+
+New resource pool
+
+Click the Start Attack button in your Intruder tab to start the attack.
+
+Attack started
+
+After a few minutes, check the /submissions website directory to see if the request to contact.php is smuggled containing the request of other users.
+
+Note: Accessing the vulnerable application while the smuggling is taking effect will capture your request instead of the request from the target user.
+
+Submissions page containing the saved request
+
+Go through the text files to check for the password that was appended to the query parameter.
+
+.txt file containing the captured request of the target user
+
+Use the password to log in to the application.
+
+
+
+
