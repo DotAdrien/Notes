@@ -1,2 +1,51 @@
 Prototype-based Inheritance: In JavaScript, every object has a prototype, and when you create a new object, you can specify its prototype. Objects inherit properties and methods from their prototype. You can use the Object.create() method to create a new object with a specified prototype, or you can directly modify the prototype of an existing object using its prototype property.
 Class-based Inheritance: JavaScript also supports classes, which provide a more familiar syntax for defining objects and inheritance. Classes in JavaScript are just syntactical sugar over JavaScript's existing prototype-based inheritance. Under the hood, classes still use prototypes.
+
+
+Standard Approach
+
+As we know, numerous properties are inherently present on the Object prototype in JavaScript. Among these, the constructor and __proto__ properties stand out as particularly notable targets for exploitation by threat actors. The constructor property points to the function that constructs an object's prototype, while __proto__ is a reference to the prototype object that the current object directly inherits from. Malicious actors often exploit these properties to manipulate an object's prototype chain, potentially leading to prototype pollution.
+
+Golden Rule
+
+The concept hinges on an attacker's ability to influence certain key parameters, such as x and val, in expressions akin to Person[x][y] = val. Suppose an attacker assigns __proto__ to x. In that case, the attribute identified by y is universally set across all objects sharing the same class as the object with the value denoted by val.
+
+In a more intricate scenario, when an attacker has control over x, y, and val in a structure like Person[x][y][z] = val, assigning x as constructor and y as prototype leads to a new property defined by z being established across all objects in the application with the assigned val. This latter approach necessitates a more complex arrangement of object properties, making it less prevalent in practice.
+
+Few Important Functions
+
+When identifying potential prototype pollution vulnerabilities, penetration testers should focus on commonly used vectors/functions susceptible to prototype pollution. A thorough examination of how an application handles object manipulation is crucial. We will understand a few important functions that an attacker can exploit, and then we will practically perform the exploitation.
+
+Property Definition by Path: Functions that set object properties based on a given path (like object[a][b][c] = value) can be dangerous if the path components are controlled by user input. These functions should be inspected to ensure they don't inadvertently modify the object's prototype. Consider an endpoint that allows users to update reviews about any friend.
+
+Few Important Functions
+
+Object Recursive Merge: This function involves recursively merging properties from source objects into a target object. An attacker can exploit this functionality if the merge function does not validate its inputs and allows merging properties into the prototype chain. Considering the same social network example, let's assume the following code. Suppose the application has a function to merge user settings:
+// Vulnerable recursive merge function
+function recursiveMerge(target, source) {
+    for (let key in source) {
+        if (source[key] instanceof Object) {
+            if (!target[key]) target[key] = {};
+            recursiveMerge(target[key], source[key]);
+        } else {
+            target[key] = source[key];
+        }
+    }
+}
+
+// Endpoint to update user settings
+app.post('/updateSettings', (req, res) => {
+    const userSettings = req.body; // User-controlled input
+    recursiveMerge(globalUserSettings, userSettings);
+    res.send('Settings updated!');
+});
+ 
+An attacker sends a request with a nested object containing __proto__:
+
+ { "__proto__": { "newProperty": "value" } } 
+Object Clone: Object cloning is a similar functionality that allows deep clone operations to copy properties from the prototype chain to another one inadvertently. Testing should ensure that these functions only clone the user-defined properties of an object and filter special keywords like __proto__, constructor, etc. A possible use case is that the application backend clones objects to create new user profiles:
+
+
+
+
+
