@@ -45,7 +45,12 @@ Bad Regex in Origin Checking: Improperly configured regular expressions in origi
 Trusting Arbitrary Supplied Origin: Some servers are configured to echo back the Origin header value in the Access-Control-Allow-Origin response header, effectively allowing any origin. An attacker can craft a custom HTTP request with a controlled origin. Since the server echoes this origin, the attacker's site can bypass the SOP restrictions. Instead of echoing back origins, maintain an allowlist of allowed origins and validate against it.
 
 
+Why Null Origin?
+Allowing requests from the "null" origin in a web application's CORS policy might seem counterintuitive, but there are specific scenarios where this might occur, either intentionally or due to misconfiguration. For example:
 
+Local Files and Development: When developers test web applications locally using file:/// URLs (e.g., opening an HTML file directly in a browser without a server), the browser typically sets the origin to "null". In such cases, developers might temporarily allow the "null" origin in CORS policies to facilitate testing.
+Sandboxed Iframes: Web applications using sandboxed iframes (with the sandbox attribute) might encounter "null" origins if the iframe's content comes from a different domain. The "null" origin is a security measure in highly restricted environments.
+Specific Use Cases: Some applications might have particular use cases that need to support interactions from non-web-browser environments or unconventional clients that don't send a standard origin. Allowing the "null" origin might be a workaround, although it's generally not recommended due to security concerns.
 
 
 
