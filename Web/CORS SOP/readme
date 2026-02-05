@@ -24,5 +24,30 @@ Simple Requests: These requests meet certain criteria set by CORS that make them
 
 Preflight Requests: These are CORS requests that the browser "preflights" with an OPTIONS request before sending the actual request to ensure that the server is willing to accept the request based on its CORS policy. Preflight is triggered when the request does not qualify as a "simple request", such as when using HTTP methods other than GET, HEAD, or POST, or when POST requests are made with another Content-Type other than the allowed values for simple requests, or when custom headers are included. The preflight OPTIONS request includes headers like Access-Control-Request-Method and Access-Control-Request-Headers, indicating the method and custom headers of the actual request. The server must respond with appropriate CORS headers, such as Access-Control-Allow-Methods, Access-Control-Allow-Headers, and Access-Control-Allow-Origin to indicate that the actual request is permitted. If the preflight succeeds, the browser will send the actual request with credentials included if Access-Control-Allow-Credentials is set to true.
 
+ACAO Configurations
+Single Origin:
+Configuration: Access-Control-Allow-Origin: https://example.com
+Implication: Only requests originating from https://example.com are allowed. This is a secure configuration, as it restricts access to a known, trusted origin.
+Multiple Origins:
+Configuration: Dynamically set based on a list of allowed origins.
+Implication: Allows requests from a specific set of origins. While this is more flexible than a single origin, it requires careful management to ensure that only trusted origins are included.
+Wildcard Origin:
+Configuration: Access-Control-Allow-Origin: *
+Implication: Permits requests from any origin. This is the least secure configuration and should be used cautiously. It's appropriate for publicly accessible resources that don't contain sensitive information.
+With Credentials:
+Configuration: Access-Control-Allow-Origin set to a specific origin (wildcards not allowed), along with Access-Control-Allow-Credentials: true
+Implication: Allows sending of credentials, such as cookies and HTTP authentication data, to be included in cross-origin requests. However, it's important to note that browsers will send cookies and authentication data without the Access-Control-Allow-Credentials header for simple requests like some GET and POST requests. For preflight requests that use methods other than GET/POST or custom headers, the Access-Control-Allow-Credentials header must be true for the browser to send credentials.
+
+CORS misconfigurations can create significant security vulnerabilities in web applications. Understanding these common misconfigurations is crucial for both developers and security professionals. We will explore several typical misconfigurations and how they can be exploited.
+
+Null Origin Misconfiguration: This occurs when a server accepts requests from the "null" origin. This can happen in scenarios where the origin of the request is not a standard browser environment, like from a file (file://) or a data URL. An attacker could craft a phishing email with a link to a malicious HTML file. When the victim opens the file, it can send requests to the vulnerable server, which incorrectly accepts these as coming from a 'null' origin. Servers should be configured to explicitly validate and not trust the 'null' origin unless necessary and understood.
+Bad Regex in Origin Checking: Improperly configured regular expressions in origin checking can lead to accepting requests from unintended origins. For example, a regex like /example.com$/ would mistakenly allow badexample.com. An attacker could register a domain that matches the flawed regex and create a malicious site to send requests to the target server. Another example of lousy regex could be related to subdomains. For example, if domains starting with example.com is allowed, an attacker could use example.com.attacker123.com. The application should ensure that regex patterns used for validating origins are thoroughly tested and specific enough to exclude unintended matches.
+Trusting Arbitrary Supplied Origin: Some servers are configured to echo back the Origin header value in the Access-Control-Allow-Origin response header, effectively allowing any origin. An attacker can craft a custom HTTP request with a controlled origin. Since the server echoes this origin, the attacker's site can bypass the SOP restrictions. Instead of echoing back origins, maintain an allowlist of allowed origins and validate against it.
+
+
+
+
+
+
 
 
