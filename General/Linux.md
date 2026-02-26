@@ -1,93 +1,153 @@
-# 🌐 Linux / Commands
+## 🧰 Base Commands
 
-This documents is for default command use on unix
+This document specifies default command usage for Unix environments.
 
----
+* Change directory
+```bash
+# Change to the specified directory
+cd /directory/
+```
+* Tool: Bash
 
-## 🧰 Base command
+* Show current directory
+```bash
+# Print the current working directory
+pwd
+```
+* Tool: Bash
 
-- Change directory\
-`cd /directory/`
+* Show content of a file
+```bash
+# Concatenate and print file content to standard output
+cat <FILE>
+```
+* Tool: Bash
 
-- Show current directory\
-`pwd`
+* Show first content of a file
+```bash
+# Output the first 10 lines of a file
+head <FILE>
+```
+* Tool: Bash
 
-- Show content of a file\
-`cat <FILE>`
+* Copy file
+```bash
+# Copy a source file to a destination path
+cp <SOURCE> <DESTINATION>
+```
+* Tool: Bash
 
-- Show first content of a file\
-`head <FILE>`
+* Move file
+```bash
+# Move or rename a file
+mv <SOURCE> <DESTINATION>
+```
+* Tool: Bash
 
-- Copie file\
-`cp <SOURCE> <DESTINATION>`
+* Remove file
+```bash
+# Force remove a file or directory recursively without prompting
+rm -rf <FILE>
+```
+* Tool: Bash
 
-- Move file\
-`mv <DESTINATION> <DESTINATION>`
+* Output command to a file
+```bash
+# Redirect standard output of a command to a file
+<COMMAND> > <FILE>
+```
+* Tool: Bash
 
-- Remove file\
-`rm -rf <FILE>`
+## 🗒️ Directory Listing
 
-- Outpout command in a file\
-`<COMMAND> > <FILE>`
+* Base command
+```bash
+# List directory contents
+ls
+```
+* Tool: Bash
 
----
+* Hidden files
+```bash
+# List all entries including those starting with a dot
+ls -a
+```
+* Tool: Bash
 
-## 🗒️ List file
-
-- Base commande\
-`ls`
-
-- Hidden file  
-`-a`
-
-- Show permission  
-`-l`
+* Show permissions
+```bash
+# Use a long listing format to view permissions, ownership, and size
+ls -l
+```
+* Tool: Bash
 
 > [!NOTE]
-> File type - [owner] rwx - [group] rwx - [user] rwx
+> File type structure: [owner] rwx - [group] rwx - [others] rwx
 
----
+## 👤 User Management
 
-## 👤 User and connexion
+* Connection history
+```bash
+# Show a listing of last logged in users
+last
+```
+* Tool: Bash
 
-- historique des connexions\
-`last`
+* Show UID, GID, and groups
+```bash
+# Print real and effective user and group IDs
+id
+```
+* Tool: Bash
 
-- affiche UID, GID et groupes d’un utilisateur\
-`id`
+* List user groups
+```bash
+# Print the specific groups a user belongs to
+groups <USERNAME>
+```
+* Tool: Bash
 
-- liste les groupes d’un utilisateur\
-`groups <USERNAME>`
+* Show current username
+```bash
+# Print effective user ID name
+whoami
+```
+* Tool: Bash
 
-- Show name of me\
-`whoami`
+## 🔎 File Searching
 
----
-
-## 🔎 Recherche de fichiers et contenu
-
-- Find file  
-`find <DIRECTORY> -name "<FILE-NAME"`
+* Find file
+```bash
+# Search for files in a directory hierarchy by exact name
+find <DIRECTORY> -name "<FILE-NAME>"
+```
+* Tool: Bash
 
 > [!TIP]
-> Use *.pdf to find all pdf\
-> Use grep command to sort the result
+> Use *.pdf to find all PDF files.
+> Use the grep command to filter standard output results.
 
-- Sort result commande  
-`<COMMAND> | grep "flag.txt`
+* Filter result output
+```bash
+# Parse command output and filter lines matching the specified pattern
+<COMMAND> | grep "flag.txt"
+```
+* Tool: Bash
 
----
+## 🔐 File Permissions
 
-## 🔐 Permission
+* Change permissions
+```bash
+# Grant read, write, and execute permissions to user, group, and others
+chmod 777 <FILE>
+```
+* Tool: Bash
 
-- Change permission to full perm to everyone\
-`chmod 777 <FILE>`
+## 🐍 Python Utilities
 
----
-
-## 🐍 Python
-
-- Easy transfer file on local network\
-`python3 -m http.server`
-
----
+* Local network file transfer
+```bash
+# Start a simple HTTP server on port 8000 for easy file sharing
+python3 -m http.server
+```
+* Tool: Bash
