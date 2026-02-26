@@ -1,66 +1,63 @@
+## 🛡️ Execution Policies
 
-The current state of the ExecutionPolicy configuration can be seen using “Get-ExecutionPolicy -list”
+The current state of the ExecutionPolicy configuration can be retrieved to determine script execution constraints on the target environment.
 
+```powershell
+# Retrieve the list of all execution policies for the current session
+Get-ExecutionPolicy -list
+```
+* Tool: PowerShell
 
+Execution policies dictate the execution environment parameters and support seven distinct values:
 
-Execution policies can have seven different values;
+* AllSigned: Scripts can run but require all scripts to be signed by a trusted publisher.
+* Bypass: All scripts execute. No warnings or prompts are displayed.
+* Default: Maps to "Restricted" for Windows clients and "RemoteSigned" for Windows servers.
+* RemoteSigned: Scripts execute. Local scripts do not require a digital signature.
+* Restricted: The default configuration for Windows clients. Allows individual commands to run; denies script execution.
+* Undefined: Indicates no specific execution policy is set, enforcing default policies.
+* Unrestricted: Permits most scripts to execute.
 
+## 🔍 Patch Enumeration
 
+Automated reconnaissance scripts may trigger antivirus detections. Identifying missing patches assists in formulating privilege escalation paths and understanding the target system's update cycles. 
 
-AllSigned: Scripts can run but require all scripts to be signed by a trusted publisher.
-Bypass: All scripts can run, and no warnings or prompts will be displayed.
-Default: This refers to “restricted” for Windows clients and “RemoteSigned” for Windows servers.
-RemoteSigned: Scripts can run, and this does not require local scripts to be digitally signed.
-Restricted: The default configuration for Windows clients. Allows individual commands to run, does not allow scripts.
-Undefined: This shows that no specific execution policy was set. This means default execution policies will be enforced.
-Unrestricted: Most scripts will run.
+```powershell
+# Enumerate all installed patches on the target system
+Get-HotFix
+```
+* Tool: PowerShell
 
+Output can be formatted into a list and processed with standard string manipulation tools to extract specific metadata, such as installation dates.
 
-While several PowerShell scripts are readily available for reconnaissance, these may be flagged by the antivirus installed on the target system.
+```powershell
+# Extract hotfix installation dates by piping list output to findstr
+Get-HotFix | Format-List | findstr /i "InstalledOn"
+```
+* Tool: PowerShell
 
+To isolate specific data points efficiently, table formatting can restrict the output to designated columns, such as extracting only the HotFixIDs.
 
+```powershell
+# Display hotfix output restricted to the HotFixID column
+Get-HotFix | Format-Table HotFixID
+```
+* Tool: PowerShell
 
-Finding Missing Patches
+## 📡 Network Scanning
 
+Custom network scanning commands avoid the necessity of dropping third-party binaries onto the target. A ping sweep iterates over a defined range for the last octet, pipes the generated IP address to the ping utility, and filters the output for "TTL" to verify host availability.
 
+```powershell
+# Execute a ping sweep across a subnet range and filter for successful responses
+1..254 | ForEach-Object { $ip="192.168.1.$_"; ping -n 1 -w 100 $ip | findstr /i "TTL" }
+```
+* Tool: PowerShell
 
-The patch level of the target system will have an impact on the steps following the initial compromise. Having an idea about the potentially missing patches could help the red teamer identify a possible privilege escalation path or even provide further information about the target system.
+Port scanning is achieved utilizing native TCP client functions. The following routine scans the first 1024 TCP ports. Standard error streams are redirected to null to ensure output clarity.
 
-
-
-The “Get-Hotfix” command can be used to enumerate already installed patches.
-
-
-
-
-
-
-
-
-To make things easier, we could output the result of the Get-Hotfix command in a list format and grep it further using the “findstr” command. The example below shows how the installation date of patches could be listed to have a better idea about update cycles on the target.
-
-
-
-
-
-
-
-
-
-By default, the “Get-HotFix” command will show the output in a table format. This table can be useful to list only data provided in a column without the need to use “findstr” using “Format-Table” followed by the name of the column we are interested in. The example below shows the output listing only HotFixIDs.
-
-
-
-
-
-The first part of the command, delimited by the "|" character, sets the range for the last octet. The second part generates and prints the IP address to be used and pipes it to the command line. Finally, the last part greps lines that include the “TTL” string.
-
-
-
-A similar command can be built using the existing socket and TCP client functions. In the example below, we scan the first 1024 TCP ports of the target. Note that the “2>$null” sends any error to null, providing us with a cleaner output.
-
-
-
-
-
-
+```powershell
+# Scan the first 1024 TCP ports using .NET sockets and suppress connection errors
+1..1024 | ForEach-Object { $tcp = New-Object System.Net.Sockets.TcpClient; $conn = $tcp.BeginConnect("127.0.0.1", $_, $null, $null); $wait = $conn.AsyncWaitHandle.WaitOne(100, $false); if ($tcp.Connected) { Write-Host "Port $_ Open" }; $tcp.Close() } 2>$null
+```
+* Tool: PowerShell
