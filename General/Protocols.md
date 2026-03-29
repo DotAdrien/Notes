@@ -134,6 +134,13 @@ xfreerdp /v:hostname /u:username /p:password
 
 ---
 
+## 🖥️ Port 5985: Windows Remote Manadger
+
+
+
+
+---
+
 ## 🧁 Protocol: NTLM (New Technology LAN Manager)
 
 Purpose: Suite of security protocols utilized to authenticate user identities within Active Directory environments. Operates over various transport protocols (e.g., SMB, HTTP).
