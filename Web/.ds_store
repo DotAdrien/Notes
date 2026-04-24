@@ -1,0 +1,9 @@
+.DS_Store Enumeration
+.DS_Store files are actually created by MacOS when it visits a directory. They store attributes of the folder and the files within it. Likely here the site was developed on a Mac and then deployed to this Windows server. The structure of the .ds_store file is proprietary, but it has been reversed (see this post for an excellent deep dive).
+
+I first found the Python-dsstore tool to parse .DS_Store files, then later learned of DS_Walk, which uses dsstore.py to recursively walk a webserver. I’ll clone it into /opt, and call it, pointing at the webserver:
+https://github.com/Keramas/DS_Walk
+root@kali# ds_walk.py -u http://10.13.38.11
+
+This gives a pretty clear picture of the directories on the server. One thing that jumped out is the two directories in /dev, both of which look like md5hashes. Some quick guessing shows that they are actually md5 hashes of the two creators, md5(mrb3n) = 304c0c90fbc6520610abbf378e2339d1 and md5(eks) = dca66d38fd916317687e1390a420c3fc.
+
