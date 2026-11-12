@@ -12,3 +12,11 @@ python2 vol.py -f recollection.bin --profile=Win7SP1x64 netscan
 python2 vol.py -f recollection.bin --profile=Win7SP1x64 filescan | grep "passwords.txt"
 python2 vol.py -f recollection.bin --profile=Win7SP1x64 dumpfiles -Q 0xOFFSET --dump-dir ./out
 ```
+
+
+
+# Volatility 3
+
+```
+vol -f "FILE" windows."command"
+```
