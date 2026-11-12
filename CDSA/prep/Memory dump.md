@@ -19,4 +19,7 @@ python2 vol.py -f recollection.bin --profile=Win7SP1x64 dumpfiles -Q 0xOFFSET --
 
 ```
 vol -f "FILE" windows."command"
+
+
+windows.info
 ```
